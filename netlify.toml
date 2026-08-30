@@ -1,0 +1,17 @@
+[build]
+  publish = "public"
+
+[[redirects]]
+  "/admin" = "/admin/index.html" 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

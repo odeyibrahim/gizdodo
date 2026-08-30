@@ -1,0 +1,22 @@
+{
+  "name": "gizdodospecials",
+  "version": "1.0.0",
+  "description": "GIZDODOSPECIALS - Freshly Made Gizdodo & More",
+  "private": true,
+  "scripts": {
+    "start": "npx serve public",
+    "dev": "npx serve public -l 3000",
+    "build": "echo 'Static site - no build step required'"
+  },
+  "keywords": [
+    "gizdodo",
+    "food",
+    "ordering",
+    "lagos",
+    "lekki",
+    "ajah",
+    "nigeria"
+  ],
+  "author": "GIZDODOSPECIALS",
+  "license": "MIT"
+}
