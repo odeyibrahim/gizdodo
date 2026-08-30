@@ -18,7 +18,7 @@
   <meta property="og:title" content="GIZDODOSPECIALS - Freshly Made Gizdodo &amp; More">
   <meta property="og:description" content="Order freshly made Gizdodo, Turkeydodo, Beefdodo, and Chickendodo in Lekki/Ajah, Lagos.">
   <meta property="og:url" content="https://gizdodospecials.com.ng/">
-  <meta property="og:image" content="https://gizdodospecials.com.ng/icons/icon-512.png">
+  <meta property="og:image" content="https://gizdodospecials.com.ng/images/gizdodo-regular.jpg">
   <meta property="og:locale" content="en_NG">
   <meta property="og:site_name" content="GIZDODOSPECIALS">
 
@@ -26,11 +26,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GIZDODOSPECIALS - Freshly Made Gizdodo &amp; More">
   <meta name="twitter:description" content="Order freshly made Gizdodo, Turkeydodo, Beefdodo, and Chickendodo in Lekki/Ajah, Lagos.">
-  <meta name="twitter:image" content="https://gizdodospecials.com.ng/icons/icon-512.png">
+  <meta name="twitter:image" content="https://gizdodospecials.com.ng/images/gizdodo-regular.jpg">
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#E8A317">
+  <meta name="theme-color" content="#F0C33C">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Gizdodo">
@@ -94,6 +94,7 @@
   ============================================ -->
   <header class="navbar" role="banner">
     <a href="#home" class="navbar-brand" aria-label="GIZDODOSPECIALS - Go to top">
+      <img src="/images/logo.jpg" alt="GIZDODOSPECIALS logo" style="height:36px;width:auto;border-radius:6px;">
       <span>GIZDODOSPECIALS</span>
     </a>
     <nav class="navbar-links" aria-label="Main navigation">
@@ -116,7 +117,10 @@
   <!-- Mobile Nav -->
   <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="closeMobileNav()"></div>
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-    <div class="mobile-nav-header"><span style="font-weight:800;font-size:15px;color:var(--text);">GIZDODOSPECIALS</span></div>
+    <div class="mobile-nav-header">
+      <img src="/images/logo.jpg" alt="" style="height:32px;border-radius:6px;">
+      <span style="font-weight:800;font-size:15px;color:var(--text);">GIZDODOSPECIALS</span>
+    </div>
     <div class="mobile-nav-divider"></div>
     <ul class="mobile-nav-links">
       <li><a href="#home" onclick="closeMobileNav()">Home</a></li>
@@ -132,30 +136,26 @@
   ============================================ -->
   <main id="main-content">
 
-    <!-- ========== HERO ========== -->
+    <!-- ========== HERO (image background) ========== -->
     <section id="home" class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
       <div class="hero-content">
-        <h1>Freshly Made <span>Gizdodo</span> &amp; More</h1>
+        <h1>Freshly Made Gizdodo &amp; More</h1>
         <p class="hero-subtitle">At GIZDODOSPECIALS, we serve up tasty Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo &amp; Chicken Feet Mix plus delicious extras and refreshing drinks to complete your meal. Prepared fresh in Lekki, Lagos.</p>
         <div class="hero-actions">
           <a href="#menu" class="btn btn-primary">Order Now</a>
           <a href="#track" class="btn btn-outline">Track Order</a>
         </div>
-        <div class="hero-stats">
-          <div class="hero-stat">6 Delicious Dishes</div>
-          <div class="hero-stat">Fresh Daily</div>
-          <div class="hero-stat">Lekki, Lagos</div>
-          <div class="hero-stat">~1 Hour Prep</div>
-        </div>
       </div>
     </section>
 
-    <!-- ========== BUSINESS INFO ========== -->
+    <!-- ========== BUSINESS INFO (centered) ========== -->
     <section class="biz-info animate-on-scroll">
       <div class="biz-info-card">
         <h2>A Note From Us</h2>
         <p>Our meals and sides are freshly prepared to order to ensure you enjoy them at their best. Preparation time: Approximately 1 hour. Delivery begins immediately after your meal has been prepared.</p>
-        <p class="hours">Monday – Saturday: 10:00 AM – 8:00 PM</p>
+        <p class="hours">Monday &ndash; Saturday: 10:00 AM &ndash; 8:00 PM</p>
         <p class="thanks">Thank you for choosing us and for always supporting GizdodoSpecials. We truly appreciate you!</p>
       </div>
     </section>
@@ -168,24 +168,17 @@
         </div>
         <p class="menu-subtitle">Fresh, flavourful &amp; made with love</p>
 
-        <!-- Category Filter -->
+        <!-- Category Filter: All / Mains / Drinks -->
         <div class="category-tabs" role="tablist" aria-label="Food category filter">
           <button class="category-tab active" data-cat="all" role="tab" onclick="setCategory('all')">All</button>
           <button class="category-tab" data-cat="mains" role="tab" onclick="setCategory('mains')">Mains</button>
-          <button class="category-tab" data-cat="addons" role="tab" onclick="setCategory('addons')">Add-ons</button>
           <button class="category-tab" data-cat="drinks" role="tab" onclick="setCategory('drinks')">Drinks</button>
         </div>
 
-        <!-- Mains Grid (rendered by JS with per-product tier tabs) -->
+        <!-- Mains Grid (rendered by JS with per-product tier radios) -->
         <div id="mains-section-wrap">
           <h3 class="section-heading">Mains</h3>
           <div class="product-grid" id="mains-grid" role="list" aria-label="Main dishes"></div>
-        </div>
-
-        <!-- Add-ons -->
-        <div id="addons-section-wrap">
-          <h3 class="section-heading" style="margin-top:40px;">Add-ons <span style="font-size:12px;color:var(--destructive);font-weight:600;margin-left:8px;">Only available with Maxi</span></h3>
-          <div class="mini-grid" id="addons-grid" role="list" aria-label="Add-on items"></div>
         </div>
 
         <!-- Drinks -->
@@ -277,7 +270,7 @@
           <div class="contact-card animate-on-scroll">
             <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <h3>Opening Hours</h3>
-            <p>Monday – Saturday: 10:00 AM – 8:00 PM</p>
+            <p>Monday &ndash; Saturday: 10:00 AM &ndash; 8:00 PM</p>
             <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">Closed on Sundays</p>
           </div>
         </div>
@@ -300,45 +293,27 @@
   </main>
 
   <!-- ============================================
-       FOOTER
+       FOOTER (red bg, white text, IG only)
   ============================================ -->
   <footer class="footer" role="contentinfo">
     <div class="footer-inner">
       <div class="footer-brand">
-        <span style="font-weight:800;font-size:16px;color:var(--text);">GIZDODOSPECIALS</span>
-        <p>At GIZDODOSPECIALS, we serve up tasty Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo &amp; Chicken Feet Mix plus delicious extras and refreshing drinks to complete your meal. Prepared fresh in Lekki, Lagos.</p>
+        <div class="footer-brand-name">GIZDODOSPECIALS</div>
+        <p>At GIZDODOSPECIALS, we serve up tasty Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo &amp; Chicken Feet Mix plus delicious extras and refreshing drinks. Prepared fresh in Lekki, Lagos.</p>
       </div>
-      <div class="footer-col">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="#menu">Order Now</a></li>
-          <li><a href="#track">Track Order</a></li>
-          <li><a href="#contact">Contact Us</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <div style="margin-bottom:24px;">
-          <h4>Opening Hours</h4>
-          <div class="footer-hours-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <div>
-              <p class="day">Monday – Saturday</p>
-              <p class="time">10:00 AM – 8:00 PM</p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <h4>Connect</h4>
-          <div class="footer-socials">
-            <a href="#" class="footer-social-link" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
-            <a href="#" class="footer-social-link" aria-label="TikTok"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></a>
-            <a href="#" class="footer-social-link" aria-label="WhatsApp"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
-          </div>
-        </div>
+      <div class="footer-socials">
+        <a href="https://www.instagram.com/gizdodospecials" class="footer-social-link" aria-label="Instagram" target="_blank" rel="noopener">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
       </div>
     </div>
     <div class="footer-bottom">&copy; 2026 GIZDODOSPECIALS. All rights reserved.</div>
   </footer>
+
+  <!-- Back to top button -->
+  <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   <!-- ============================================
        CART DRAWER
@@ -358,26 +333,6 @@
         <span class="value" id="cart-subtotal">&#x20A6;0</span>
       </div>
       <button class="btn btn-primary" style="width:100%;padding:16px;" onclick="openCheckout()">Checkout</button>
-    </div>
-  </aside>
-
-  <!-- ============================================
-       ADDON PICKER SHEET
-  ============================================ -->
-  <div class="sheet-overlay" id="addon-sheet-overlay" onclick="closeAddonPicker()"></div>
-  <aside class="sheet" id="addon-sheet" role="dialog" aria-label="Select add-ons">
-    <div class="sheet-header">
-      <h3>Select Add-ons</h3>
-      <button class="sheet-close" onclick="closeAddonPicker()" aria-label="Close add-ons">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="sheet-body">
-      <div class="addons-panel" id="addon-items"></div>
-    </div>
-    <div class="sheet-footer" style="display:flex;justify-content:space-between;align-items:center;">
-      <div><p style="font-size:13px;color:var(--text-muted);">Total</p><p style="font-size:20px;font-weight:700;color:var(--text);" id="addon-total">&#x20A6;0</p></div>
-      <button class="btn btn-primary" onclick="confirmAddonPicker()">Add to Cart</button>
     </div>
   </aside>
 
@@ -461,8 +416,14 @@
           <div class="payment-info-row"><span class="label">Amount:</span><span class="value amount" id="checkout-amount">&#x20A6;0</span></div>
         </div>
 
-        <div class="payment-notice">
-          Delivery fee is paid separately to the rider upon delivery.
+        <!-- Checkout notices -->
+        <div class="checkout-notice" style="margin-top:16px;">
+          <div class="checkout-notice-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <strong>Kindly make payment and send payment receipt.</strong> Please note your order will be processed once your payment is confirmed.
+        </div>
+        <div class="checkout-notice">
+          <div class="checkout-notice-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+          <strong>Delivery fee notice:</strong> Delivery fee will be paid directly to the rider upon delivery. Most of our riders are independent dispatch riders, so delivery payment is handled separately from the food payment. Please ensure someone is available to receive the order and pay the rider.
         </div>
 
         <label class="checkbox-label">
