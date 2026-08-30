@@ -1,6 +1,6 @@
 /* ============================================
    GIZDODOSPECIALS — Customer App Logic
-   Single-page scroll · Per-product tier radios
+   Single-page scroll · Per-product tier radios · Inline extras
    ============================================ */
 (function () {
   'use strict';
@@ -22,15 +22,15 @@
   }
 
   /* --------------------------------------------
-     SVG ICONS (inline, no external dep)
+     SVG ICONS
   -------------------------------------------- */
   var ICONS = {
-    shoppingBag: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
     plus: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     minus: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     x: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-    check: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    check: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
     checkCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    shoppingBag: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
     utensils: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>',
     creditCard: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
     chefHat: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
@@ -39,18 +39,18 @@
   };
 
   /* --------------------------------------------
-     PRODUCT DATA
+     PRODUCT DATA (with real image paths)
   -------------------------------------------- */
   var PRODUCTS = [
-    { id: 'gizdodo', name: 'Gizdodo', description: 'Our signature dish — perfectly fried plantain (dodo) paired with sautéed gizzard in a rich, spicy sauce. A Lagos favourite.', category: 'mains', acceptsAddons: true, regular: 9000, maxi: 15000, combo: 17000, comboLabel: 'Gizdodo + Spaghetti', images: { regular: '', maxi: '', combo: '' } },
-    { id: 'chickendodo', name: 'Chickendodo', description: 'Crispy fried plantain served with succulent, well-seasoned chicken in our special sauce.', category: 'mains', acceptsAddons: true, regular: 9000, maxi: 15000, combo: 18000, comboLabel: 'Chickendodo + Special Toppings', images: { regular: '', maxi: '', combo: '' } },
-    { id: 'turkeydodo', name: 'Turkeydodo', description: 'Juicy smoked turkey paired with golden fried plantain and our signature savoury sauce.', category: 'mains', acceptsAddons: true, regular: 10000, maxi: 17000, combo: 20000, comboLabel: 'Turkeydodo + Extra Cheese', images: { regular: '', maxi: '', combo: '' } },
-    { id: 'beefdodo', name: 'Beefdodo', description: 'Tender, flavourful beef served with crispy fried plantain in a rich pepper sauce.', category: 'mains', acceptsAddons: true, regular: 8000, maxi: 13000, combo: 15000, comboLabel: 'Beefdodo + Extra Noodles', images: { regular: '', maxi: '', combo: '' } },
-    { id: 'snaildodo', name: 'Snaildodo', description: 'Perfectly cooked snails in a fiery, aromatic sauce alongside golden plantain. A delicacy!', category: 'mains', acceptsAddons: true, regular: 10000, maxi: 20000, combo: null, comboLabel: null, images: { regular: '', maxi: '', combo: '' } },
-    { id: 'chickenfeet', name: 'Chicken Feet Mix', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain.', category: 'mains', acceptsAddons: true, regular: 9000, maxi: 13000, combo: null, comboLabel: null, images: { regular: '', maxi: '', combo: '' } },
+    { id: 'gizdodo', name: 'Gizdodo', description: 'Our signature dish \u2014 perfectly fried plantain (dodo) paired with saut\u00e9ed gizzard in a rich, spicy sauce. A Lagos favourite.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 15000, combo: 17000, comboLabel: 'Gizdodo with Extra Spaghetti', images: { regular: '/images/gizdodo-regular.jpg', maxi: '/images/gizdodo-maxi.jpg', combo: '/images/gizdodo-combo.jpg' } },
+    { id: 'chickendodo', name: 'Chickendodo', description: 'Crispy fried plantain served with succulent, well-seasoned chicken in our special sauce.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 15000, combo: 18000, comboLabel: 'Chickendodo with Special Toppings', images: { regular: '/images/chickendodo-regular.jpg', maxi: '/images/chickendodo-maxi.jpg', combo: '/images/chickendodo-combo.jpg' } },
+    { id: 'turkeydodo', name: 'Turkeydodo', description: 'Juicy smoked turkey paired with golden fried plantain and our signature savoury sauce.', category: 'mains', acceptsExtras: true, regular: 10000, maxi: 17000, combo: 20000, comboLabel: 'Turkeydodo with Extra Cheese', images: { regular: '/images/turkeydodo-regular.jpg', maxi: '/images/turkeydodo-maxi.jpg', combo: '/images/turkeydodo-combo.jpg' } },
+    { id: 'beefdodo', name: 'Beefdodo', description: 'Tender, flavourful beef served with crispy fried plantain in a rich pepper sauce.', category: 'mains', acceptsExtras: true, regular: 8000, maxi: 13000, combo: 15000, comboLabel: 'Beefdodo with Extra Noodles', images: { regular: '/images/beefdodo-regular.jpg', maxi: '/images/beefdodo-maxi.jpg', combo: '/images/beefdodo-combo.jpg' } },
+    { id: 'snaildodo', name: 'Snaildodo', description: 'Perfectly cooked snails in a fiery, aromatic sauce alongside golden plantain. A delicacy!', category: 'mains', acceptsExtras: true, regular: 10000, maxi: 20000, combo: null, comboLabel: null, images: { regular: '/images/snaildodo-regular.jpg', maxi: '/images/snaildodo-maxi.jpg', combo: '' } },
+    { id: 'chickenfeet', name: 'Chicken Feet Mix', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 13000, combo: null, comboLabel: null, images: { regular: '/images/chickenfeet-regular.jpg', maxi: '/images/chickenfeet-maxi.jpg', combo: '' } },
   ];
 
-  var ADDONS = [
+  var EXTRAS = [
     { id: 'pasta', name: 'Pasta', description: 'Well-cooked pasta to pair with your Maxi meal.', price: 2000 },
     { id: 'spaghetti', name: 'Spaghetti', description: 'Classic spaghetti, perfectly boiled.', price: 2000 },
     { id: 'noodles', name: 'Noodles', description: 'Soft and tasty noodles.', price: 2000 },
@@ -60,9 +60,9 @@
   ];
 
   var DRINKS = [
-    { id: 'pineapple', name: 'Pineapple Juice', price: 3000 },
-    { id: 'pineapple-ginger', name: 'Pineapple + Ginger Juice', price: 3000 },
-    { id: 'chapman', name: 'Chapman', price: 3000 },
+    { id: 'pineapple', name: 'Pineapple Juice', price: 3000, image: '/images/pineapple-juice.jpg' },
+    { id: 'pineapple-ginger', name: 'Pineapple + Ginger Juice', price: 3000, image: '/images/pineapple-juice.jpg' },
+    { id: 'chapman', name: 'Chapman', price: 3000, image: '/images/chapman.jpg' },
   ];
 
   /* --------------------------------------------
@@ -74,15 +74,14 @@
     mobileNavOpen: false,
     cartOpen: false,
     checkoutOpen: false,
-    addonPickerOpen: false,
-    pendingCartItem: null,
-    selectedAddonIds: {},
-    // Per-product selected tier (default: regular)
     productTiers: {},
+    productSelectedExtras: {},
   };
 
-  // Initialize per-product tiers
-  PRODUCTS.forEach(function (p) { state.productTiers[p.id] = 'regular'; });
+  PRODUCTS.forEach(function (p) {
+    state.productTiers[p.id] = 'regular';
+    state.productSelectedExtras[p.id] = {};
+  });
 
   /* --------------------------------------------
      HELPERS
@@ -93,8 +92,8 @@
 
   function getCartTotal() {
     return state.cart.reduce(function (sum, item) {
-      var addonsTotal = item.addOns.reduce(function (s, a) { return s + a.price; }, 0);
-      return sum + (item.price + addonsTotal) * item.quantity;
+      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
+      return sum + (item.price + extrasTotal) * item.quantity;
     }, 0);
   }
 
@@ -103,7 +102,7 @@
   }
 
   function cartItemKey(item) {
-    return item.productId + '-' + item.tier + '-' + item.addOns.map(function (a) { return a.name; }).sort().join(',');
+    return item.productId + '-' + item.tier + '-' + item.extras.map(function (e) { return e.id; }).sort().join(',');
   }
 
   function relativeTime(dateStr) {
@@ -175,18 +174,17 @@
     if (state.cartOpen) renderCartDrawer();
   }
 
-  function removeFromCart(productId, tier) {
-    state.cart = state.cart.filter(function (c) {
-      return !(c.productId === productId && c.tier === tier);
-    });
+  function removeFromCart(idx) {
+    if (idx >= 0 && idx < state.cart.length) {
+      state.cart.splice(idx, 1);
+    }
     renderCartBadge();
     renderCartDrawer();
   }
 
-  function updateQuantity(productId, tier, qty) {
-    if (qty <= 0) { removeFromCart(productId, tier); return; }
-    var item = state.cart.find(function (c) { return c.productId === productId && c.tier === tier; });
-    if (item) item.quantity = qty;
+  function updateQuantity(idx, qty) {
+    if (qty <= 0) { removeFromCart(idx); return; }
+    if (state.cart[idx]) state.cart[idx].quantity = qty;
     renderCartBadge();
     renderCartDrawer();
   }
@@ -243,27 +241,27 @@
 
     document.getElementById('cart-footer').style.display = 'flex';
     var html = '';
-    state.cart.forEach(function (item) {
-      var addonsTotal = item.addOns.reduce(function (s, a) { return s + a.price; }, 0);
-      var unitTotal = item.price + addonsTotal;
+    state.cart.forEach(function (item, idx) {
+      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
+      var unitTotal = item.price + extrasTotal;
       var lineTotal = unitTotal * item.quantity;
-      var tierBadge = item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
+      var tierBadge = item.tier !== 'regular' && item.tier !== 'drink'
         ? '<span class="cart-item-badge">' + (item.comboLabel || getTierLabel(item.tier)) + '</span>' : '';
-      var addonsText = item.addOns.length > 0 ? '<p class="cart-item-addons">+ ' + item.addOns.map(function (a) { return a.name; }).join(', ') + '</p>' : '';
+      var extrasText = item.extras.length > 0 ? '<p class="cart-item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
       html += '<div class="cart-item">' +
-        '<div class="cart-item-img"><span class="placeholder-icon">' + ICONS.utensils + '</span></div>' +
+        '<div class="cart-item-img"><span class="placeholder-icon" style="font-size:11px;">' + ICONS.utensils + '</span></div>' +
         '<div class="cart-item-body">' +
           '<div class="cart-item-name-row"><span class="cart-item-name">' + item.name + '</span>' + tierBadge + '</div>' +
-          addonsText +
+          extrasText +
           '<p class="cart-item-price">' + formatPrice(unitTotal) + ' each</p>' +
           '<div class="cart-item-actions">' +
             '<div class="qty-controls">' +
-              '<button class="qty-btn" onclick="updateQuantity(\'' + item.productId + '\',\'' + item.tier + '\',' + (item.quantity - 1) + ')" aria-label="Decrease quantity">' + ICONS.minus + '</button>' +
+              '<button class="qty-btn" onclick="updateQuantity(' + idx + ',' + (item.quantity - 1) + ')" aria-label="Decrease quantity">' + ICONS.minus + '</button>' +
               '<span class="qty-value">' + item.quantity + '</span>' +
-              '<button class="qty-btn" onclick="updateQuantity(\'' + item.productId + '\',\'' + item.tier + '\',' + (item.quantity + 1) + ')" aria-label="Increase quantity">' + ICONS.plus + '</button>' +
+              '<button class="qty-btn" onclick="updateQuantity(' + idx + ',' + (item.quantity + 1) + ')" aria-label="Increase quantity">' + ICONS.plus + '</button>' +
             '</div>' +
             '<span class="cart-item-line-total">' + formatPrice(lineTotal) + '</span>' +
-            '<button class="cart-item-remove" onclick="removeFromCart(\'' + item.productId + '\',\'' + item.tier + '\')" aria-label="Remove item">' + ICONS.x + '</button>' +
+            '<button class="cart-item-remove" onclick="removeFromCart(' + idx + ')" aria-label="Remove item">' + ICONS.x + '</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -278,9 +276,24 @@
   function setProductTier(productId, tier) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
-    // Don't allow combo if product has no combo
     if (tier === 'combo' && !product.combo) return;
     state.productTiers[productId] = tier;
+    // Clear extras when switching away from maxi
+    if (tier !== 'maxi') {
+      state.productSelectedExtras[productId] = {};
+    }
+    renderMenu();
+  }
+
+  /* --------------------------------------------
+     INLINE EXTRAS TOGGLE
+  -------------------------------------------- */
+  function toggleInlineExtra(productId, extraId) {
+    if (state.productSelectedExtras[productId][extraId]) {
+      delete state.productSelectedExtras[productId][extraId];
+    } else {
+      state.productSelectedExtras[productId][extraId] = true;
+    }
     renderMenu();
   }
 
@@ -302,7 +315,6 @@
 
   function renderMenu() {
     var mainsContainer = document.getElementById('mains-grid');
-    var addonsContainer = document.getElementById('addons-grid');
     var drinksContainer = document.getElementById('drinks-grid');
 
     // ---- Mains ----
@@ -315,31 +327,50 @@
         ? '<img src="' + imgUrl + '" alt="' + p.name + ' - ' + getTierLabel(tier) + '" loading="lazy">'
         : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
 
-      // Tier radio buttons
       var hasCombo = !!p.combo;
-      var radiosHtml = '<div class="product-tier-radios" role="radiogroup" aria-label="' + p.name + ' tier">';
+
+      // Tier radio buttons (stacked, full-width, with prices)
+      var radiosHtml = '<div class="product-tier-radios" role="radiogroup" aria-label="' + p.name + ' size">';
       ['regular', 'maxi', 'combo'].forEach(function (t) {
         var isDisabled = (t === 'combo' && !hasCombo);
         var isActive = (t === tier);
         var label = t === 'combo' ? 'Special Combo' : t.charAt(0).toUpperCase() + t.slice(1);
+        var tPrice = getPriceForTier(p, t);
         var cls = 'ptier-radio' + (isActive ? ' active' : '') + (isDisabled ? ' disabled' : '');
         radiosHtml += '<button class="' + cls + '" role="radio" aria-checked="' + isActive + '"' +
           (isDisabled ? ' disabled aria-disabled="true"' : '') +
-          ' onclick="setProductTier(\'' + p.id + '\',\'' + t + '\')">' + label + '</button>';
+          ' onclick="setProductTier(\'' + p.id + '\',\'' + t + '\')">' +
+          '<span>' + label + '</span>' +
+          '<span class="ptier-price">' + formatPrice(tPrice) + '</span>' +
+          '</button>';
       });
       radiosHtml += '</div>';
 
-      // Combo info (shows under the tier radios when combo is selected)
+      // Combo info
       var comboInfo = (tier === 'combo' && p.comboLabel)
         ? '<p class="combo-label">' + p.comboLabel + '</p>'
         : '';
 
-      // Add-ons notice (always visible for products that accept addons)
-      var addonNotice = p.acceptsAddons
-        ? '<span class="addon-notice">+ Add-ons available with Maxi</span>'
+      // Extras notice (always visible)
+      var extrasNotice = p.acceptsExtras
+        ? '<span class="extras-notice">+ Extras available for Maxi Bowls</span>'
         : '';
 
-      // Tier gradient class on card
+      // Inline extras (only when maxi is selected)
+      var inlineExtrasHtml = '';
+      if (tier === 'maxi' && p.acceptsExtras) {
+        inlineExtrasHtml = '<div class="inline-extras"><p class="inline-extras-title">Select Extras</p>';
+        EXTRAS.forEach(function (e) {
+          var sel = !!state.productSelectedExtras[p.id][e.id];
+          inlineExtrasHtml += '<div class="inline-extra-item' + (sel ? ' selected' : '') + '" onclick="toggleInlineExtra(\'' + p.id + '\',\'' + e.id + '\')">' +
+            '<div class="inline-extra-check">' + (sel ? ICONS.check : '') + '</div>' +
+            '<div class="inline-extra-info"><span class="name">' + e.name + '</span><span class="price">' + formatPrice(e.price) + '</span></div>' +
+            '</div>';
+        });
+        inlineExtrasHtml += '</div>';
+      }
+
+      // Tier class for gradient
       var tierClass = 'tier-' + tier;
 
       // Button
@@ -351,33 +382,28 @@
       mainsHtml += '<div class="product-card ' + tierClass + '" data-product-id="' + p.id + '">' +
         '<div class="product-card-image">' + imgHtml + '</div>' +
         '<div class="product-card-body">' +
-          radiosHtml +
-          comboInfo +
           '<h4>' + p.name + '</h4>' +
           '<p class="desc">' + p.description + '</p>' +
-          addonNotice +
-          '<p class="product-price">' + formatPrice(price) + '</p>' +
+          extrasNotice +
+          radiosHtml +
+          comboInfo +
+          inlineExtrasHtml +
+          '<button class="product-add-btn"' + btnDisabled + btnAction + '>' + btnLabel + '</button>' +
         '</div>' +
-        '<button class="btn btn-primary" style="width:100%"' + btnDisabled + btnAction + '>' + btnLabel + '</button>' +
       '</div>';
     });
     mainsContainer.innerHTML = mainsHtml;
 
-    // ---- Add-ons ----
-    var addonsHtml = '';
-    ADDONS.forEach(function (a) {
-      addonsHtml += '<div class="mini-card">' +
-        '<div class="mini-card-info"><p class="name">' + a.name + '</p><p class="price">' + formatPrice(a.price) + '</p></div>' +
-        '<button class="mini-card-add-btn" onclick="addAddonDirect(\'' + a.id + '\')" aria-label="Add ' + a.name + '">' + ICONS.plus + '</button>' +
-      '</div>';
-    });
-    addonsContainer.innerHTML = addonsHtml;
-
     // ---- Drinks ----
     var drinksHtml = '';
     DRINKS.forEach(function (d) {
+      var thumbHtml = d.image
+        ? '<div class="mini-card-thumb"><img src="' + d.image + '" alt="' + d.name + '" loading="lazy"></div>'
+        : '<div class="mini-card-thumb"><span class="placeholder-icon" style="opacity:0.3;">' + ICONS.utensils + '</span></div>';
       drinksHtml += '<div class="mini-card">' +
-        '<div class="mini-card-info"><p class="name">' + d.name + '</p><p class="price">' + formatPrice(d.price) + '</p></div>' +
+        '<div class="mini-card-info">' + thumbHtml +
+          '<div class="mini-card-text"><p class="name">' + d.name + '</p><p class="price">' + formatPrice(d.price) + '</p></div>' +
+        '</div>' +
         '<button class="mini-card-add-btn" onclick="addDrink(\'' + d.id + '\')" aria-label="Add ' + d.name + '">' + ICONS.plus + '</button>' +
       '</div>';
     });
@@ -385,10 +411,8 @@
 
     // ---- Category section visibility ----
     var mainsWrap = document.getElementById('mains-section-wrap');
-    var addonsWrap = document.getElementById('addons-section-wrap');
     var drinksWrap = document.getElementById('drinks-section-wrap');
     if (mainsWrap) mainsWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'mains') ? 'block' : 'none';
-    if (addonsWrap) addonsWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'addons') ? 'block' : 'none';
     if (drinksWrap) drinksWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'drinks') ? 'block' : 'none';
   }
 
@@ -401,19 +425,13 @@
     var tier = state.productTiers[productId] || 'regular';
     var price = getPriceForTier(product, tier);
 
-    // If maxi and acceptsAddons, open addon picker
-    if (tier === 'maxi' && product.acceptsAddons) {
-      state.pendingCartItem = {
-        productId: product.id,
-        name: product.name,
-        price: price,
-        tier: tier,
-        comboLabel: null,
-        addOns: [],
-      };
-      state.selectedAddonIds = {};
-      openAddonPicker();
-      return;
+    // Gather selected extras for this product
+    var selectedExtras = [];
+    if (tier === 'maxi' && product.acceptsExtras) {
+      var sel = state.productSelectedExtras[productId] || {};
+      EXTRAS.forEach(function (e) {
+        if (sel[e.id]) selectedExtras.push({ id: e.id, name: e.name, price: e.price });
+      });
     }
 
     addToCart({
@@ -422,23 +440,15 @@
       price: price,
       tier: tier,
       comboLabel: tier === 'combo' ? product.comboLabel : null,
-      addOns: [],
+      extras: selectedExtras,
     });
-    toast(product.name + ' added to cart');
-  }
 
-  function addAddonDirect(addonId) {
-    var addon = ADDONS.find(function (a) { return a.id === addonId; });
-    if (!addon) return;
-    addToCart({
-      productId: 'addon-' + addon.id,
-      name: addon.name,
-      price: addon.price,
-      tier: 'addon',
-      comboLabel: null,
-      addOns: [],
-    });
-    toast(addon.name + ' added');
+    // Clear selected extras after adding
+    state.productSelectedExtras[productId] = {};
+    renderMenu();
+
+    var extrasStr = selectedExtras.length > 0 ? ' with ' + selectedExtras.map(function (e) { return e.name; }).join(', ') : '';
+    toast(product.name + extrasStr + ' added to cart');
   }
 
   function addDrink(drinkId) {
@@ -450,57 +460,9 @@
       price: drink.price,
       tier: 'drink',
       comboLabel: null,
-      addOns: [],
+      extras: [],
     });
     toast(drink.name + ' added');
-  }
-
-  /* --------------------------------------------
-     ADDON PICKER SHEET
-  -------------------------------------------- */
-  function openAddonPicker() {
-    state.addonPickerOpen = true;
-    renderAddonPicker();
-    document.getElementById('addon-sheet').classList.add('open');
-    document.getElementById('addon-sheet-overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeAddonPicker() {
-    state.addonPickerOpen = false;
-    document.getElementById('addon-sheet').classList.remove('open');
-    document.getElementById('addon-sheet-overlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  function toggleAddon(addonId) {
-    if (state.selectedAddonIds[addonId]) delete state.selectedAddonIds[addonId];
-    else state.selectedAddonIds[addonId] = true;
-    renderAddonPicker();
-  }
-
-  function renderAddonPicker() {
-    var container = document.getElementById('addon-items');
-    var basePrice = state.pendingCartItem ? state.pendingCartItem.price : 0;
-    var addonsTotal = 0;
-    var html = '';
-    ADDONS.forEach(function (a) {
-      var selected = !!state.selectedAddonIds[a.id];
-      if (selected) addonsTotal += a.price;
-      html += '<div class="addon-item' + (selected ? ' selected' : '') + '" onclick="toggleAddon(\'' + a.id + '\')">' +
-        '<div class="addon-check">' + (selected ? ICONS.check : '') + '</div>' +
-        '<div class="addon-info"><p class="name">' + a.name + '</p><p class="desc">' + a.description + '</p><p class="price">' + formatPrice(a.price) + '</p></div>' +
-      '</div>';
-    });
-    container.innerHTML = html;
-    document.getElementById('addon-total').textContent = formatPrice(basePrice + addonsTotal);
-  }
-
-  function confirmAddonPicker() {
-    if (!state.pendingCartItem) return;
-    var selectedAddons = ADDONS.filter(function (a) { return !!state.selectedAddonIds[a.id]; }).map(function (a) { return { name: a.name, price: a.price }; });
-    addToCart(Object.assign({}, state.pendingCartItem, { addOns: selectedAddons }));
-    toast(state.pendingCartItem.name + ' added to cart');
-    closeAddonPicker();
   }
 
   /* --------------------------------------------
@@ -535,13 +497,13 @@
 
     var summaryHtml = '';
     state.cart.forEach(function (item) {
-      var addonsTotal = item.addOns.reduce(function (s, a) { return s + a.price; }, 0);
-      var unitTotal = item.price + addonsTotal;
-      var tierStr = item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
+      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
+      var unitTotal = item.price + extrasTotal;
+      var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
         ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.comboLabel || getTierLabel(item.tier)) + ')</span>' : '';
-      var addonsStr = item.addOns.length > 0 ? '<p class="item-addons">+ ' + item.addOns.map(function (a) { return a.name; }).join(', ') + '</p>' : '';
+      var extrasStr = item.extras.length > 0 ? '<p class="item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
       summaryHtml += '<div class="order-summary-item">' +
-        '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + addonsStr + '</div>' +
+        '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + extrasStr + '</div>' +
         '<span class="item-total">' + formatPrice(unitTotal * item.quantity) + '</span>' +
       '</div>';
     });
@@ -580,10 +542,10 @@
     if (notes) msg += '*Notes:* ' + notes + '%0A';
     msg += '%0A*Order:*%0A';
     state.cart.forEach(function (item) {
-      var tierStr = item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
+      var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
         ? ' (' + (item.comboLabel || getTierLabel(item.tier)) + ')' : '';
-      var addonsStr = item.addOns.length > 0 ? ' + ' + item.addOns.map(function (a) { return a.name; }).join(', ') : '';
-      msg += '\u2022 ' + item.name + tierStr + addonsStr + ' \u00D7' + item.quantity + ' = ' + formatPrice((item.price + item.addOns.reduce(function (s, a) { return s + a.price; }, 0)) * item.quantity) + '%0A';
+      var extrasStr = item.extras.length > 0 ? ' + ' + item.extras.map(function (e) { return e.name; }).join(', ') : '';
+      msg += '\u2022 ' + item.name + tierStr + extrasStr + ' \u00D7' + item.quantity + ' = ' + formatPrice((item.price + item.extras.reduce(function (s, e) { return s + e.price; }, 0)) * item.quantity) + '%0A';
     });
     msg += '%0A*Total: ' + formatPrice(total) + '*%0A';
     msg += '%0APayment made to ' + CONFIG.BANK_NAME + ' ' + CONFIG.BANK_ACCOUNT + ' (' + CONFIG.BANK_ACC_NAME + ')';
@@ -630,19 +592,13 @@
           'Prefer': 'return=minimal',
         },
         body: JSON.stringify({
-          customer_name: order.name,
-          customer_phone: order.phone,
-          customer_email: order.email,
-          delivery_type: order.deliveryType,
-          delivery_address: order.address,
-          delivery_area: order.area,
-          order_notes: order.notes,
-          total: order.total,
-          status: 'payment_pending',
+          customer_name: order.name, customer_phone: order.phone, customer_email: order.email,
+          delivery_type: order.deliveryType, delivery_address: order.address, delivery_area: order.area,
+          order_notes: order.notes, total: order.total, status: 'payment_pending',
           items: JSON.stringify(state.cart),
         }),
       });
-    } catch (e) { /* silent — WhatsApp is the primary channel */ }
+    } catch (e) { /* silent */ }
   }
 
   function closeSuccessModal() {
@@ -662,7 +618,6 @@
     var errorEl = document.getElementById('track-error');
     container.innerHTML = '';
     errorEl.style.display = 'none';
-
     container.innerHTML = '<div style="text-align:center;padding:40px;"><div class="skeleton" style="width:60%;height:20px;margin:0 auto 12px;"></div><div class="skeleton" style="width:40%;height:16px;margin:0 auto;"></div></div>';
 
     if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_KEY) {
@@ -710,14 +665,13 @@
     var container = document.getElementById('track-result');
     var currentIdx = getStatusIndex(order.status);
     var statusLabel = order.status.replace(/_/g, ' ').toUpperCase();
-
     var items = [];
     try { items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []); } catch (e) { items = []; }
 
     var itemsHtml = '';
     items.forEach(function (item) {
-      var itemTotal = (item.price + item.addOns.reduce(function (s, a) { return s + a.price; }, 0)) * item.quantity;
-      var tierStr = item.tier && item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
+      var itemTotal = (item.price + (item.extras || []).reduce(function (s, e) { return s + e.price; }, 0)) * item.quantity;
+      var tierStr = item.tier && item.tier !== 'regular' && item.tier !== 'drink'
         ? ' <span style="color:var(--primary);">(' + (item.comboLabel || item.tier) + ')</span>' : '';
       itemsHtml += '<div class="track-item-row"><span>' + item.name + tierStr + ' <span style="color:var(--text-muted);">\u00D7' + item.quantity + '</span></span><span style="font-weight:600;">' + formatPrice(itemTotal) + '</span></div>';
     });
@@ -774,6 +728,17 @@
   }
 
   /* --------------------------------------------
+     BACK TO TOP
+  -------------------------------------------- */
+  function initBackToTop() {
+    var btn = document.getElementById('back-to-top');
+    if (!btn) return;
+    window.addEventListener('scroll', function () {
+      btn.classList.toggle('visible', window.scrollY > 400);
+    });
+  }
+
+  /* --------------------------------------------
      NAVBAR SCROLL SPY
   -------------------------------------------- */
   function initScrollSpy() {
@@ -802,35 +767,31 @@
     renderCategoryTabs();
     renderMenu();
     initScrollAnimations();
+    initBackToTop();
     initScrollSpy();
 
-    // Handle hash on load
     if (window.location.hash) {
       var target = document.querySelector(window.location.hash);
       if (target) setTimeout(function () { target.scrollIntoView({ behavior: 'smooth' }); }, 100);
     }
 
-    // Close overlays on escape
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        if (state.addonPickerOpen) closeAddonPicker();
-        else if (state.checkoutOpen) closeCheckout();
+        if (state.checkoutOpen) closeCheckout();
         else if (state.cartOpen) closeCart();
         else if (state.mobileNavOpen) closeMobileNav();
       }
     });
 
-    // Track input enter key
     var trackInput = document.getElementById('track-input');
     if (trackInput) trackInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') handleTrackOrder(); });
 
-    // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(function () {});
     }
   }
 
-  // Expose functions to global scope for onclick handlers
+  // Expose to global scope
   window.openMobileNav = openMobileNav;
   window.closeMobileNav = closeMobileNav;
   window.openCart = openCart;
@@ -838,12 +799,10 @@
   window.updateQuantity = updateQuantity;
   window.removeFromCart = removeFromCart;
   window.setProductTier = setProductTier;
+  window.toggleInlineExtra = toggleInlineExtra;
   window.setCategory = setCategory;
   window.handleAddToCart = handleAddToCart;
-  window.addAddonDirect = addAddonDirect;
   window.addDrink = addDrink;
-  window.toggleAddon = toggleAddon;
-  window.confirmAddonPicker = confirmAddonPicker;
   window.openCheckout = openCheckout;
   window.closeCheckout = closeCheckout;
   window.setDeliveryType = setDeliveryType;
@@ -851,7 +810,6 @@
   window.closeSuccessModal = closeSuccessModal;
   window.handleTrackOrder = handleTrackOrder;
 
-  // Boot
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
