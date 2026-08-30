@@ -75,7 +75,7 @@
   }
   </script>
 
-  <!-- Schema.org: WebSite with search -->
+  <!-- Schema.org: WebSite -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -87,20 +87,20 @@
 </head>
 <body>
   <!-- Skip Navigation -->
-  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <a href="#menu" class="skip-nav">Skip to menu</a>
 
   <!-- ============================================
        NAVBAR
   ============================================ -->
   <header class="navbar" role="banner">
-    <a href="#" class="navbar-brand" onclick="setView('home'); return false;" aria-label="GIZDODOSPECIALS - Go to home">
+    <a href="#home" class="navbar-brand" aria-label="GIZDODOSPECIALS - Go to top">
       <span>GIZDODOSPECIALS</span>
     </a>
     <nav class="navbar-links" aria-label="Main navigation">
-      <a href="#home" data-nav="home" onclick="setView('home'); return false;">Home</a>
-      <a href="#menu" data-nav="menu" onclick="setView('menu'); return false;">Menu</a>
-      <a href="#track" data-nav="track" onclick="setView('track'); return false;">Track Order</a>
-      <a href="#contact" data-nav="contact" onclick="setView('contact'); return false;">Contact</a>
+      <a href="#home">Home</a>
+      <a href="#menu">Menu</a>
+      <a href="#track">Track Order</a>
+      <a href="#contact">Contact</a>
     </nav>
     <div class="navbar-actions">
       <button class="navbar-cart-btn" onclick="openCart()" aria-label="Shopping cart">
@@ -119,200 +119,182 @@
     <div class="mobile-nav-header"><span style="font-weight:800;font-size:15px;color:var(--text);">GIZDODOSPECIALS</span></div>
     <div class="mobile-nav-divider"></div>
     <ul class="mobile-nav-links">
-      <li><a href="#home" data-nav="home" onclick="setView('home'); return false;">Home</a></li>
-      <li><a href="#menu" data-nav="menu" onclick="setView('menu'); return false;">Menu</a></li>
-      <li><a href="#track" data-nav="track" onclick="setView('track'); return false;">Track Order</a></li>
-      <li><a href="#contact" data-nav="contact" onclick="setView('contact'); return false;">Contact</a></li>
+      <li><a href="#home" onclick="closeMobileNav()">Home</a></li>
+      <li><a href="#menu" onclick="closeMobileNav()">Menu</a></li>
+      <li><a href="#track" onclick="closeMobileNav()">Track Order</a></li>
+      <li><a href="#contact" onclick="closeMobileNav()">Contact</a></li>
     </ul>
     <div class="mobile-nav-footer">Fresh in Lekki, Lagos</div>
   </nav>
 
   <!-- ============================================
-       MAIN CONTENT
+       MAIN CONTENT (single-page scroll)
   ============================================ -->
   <main id="main-content">
 
-    <!-- ========== HOME VIEW ========== -->
-    <section id="view-home" class="view-section active" aria-label="Home">
-
-      <!-- Hero -->
-      <section class="hero">
-        <div class="hero-content">
-          <h1>Freshly Made <span>Gizdodo</span> &amp; More</h1>
-          <p class="hero-subtitle">At GIZDODOSPECIALS, we serve up tasty Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo &amp; Chicken Feet Mix plus delicious extras and refreshing drinks to complete your meal. Prepared fresh in Lekki, Lagos.</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" onclick="setView('menu')">Order Now</button>
-            <button class="btn btn-outline" onclick="setView('track')">Track Order</button>
-          </div>
-          <div class="hero-stats">
-            <div class="hero-stat">6 Delicious Dishes</div>
-            <div class="hero-stat">Fresh Daily</div>
-            <div class="hero-stat">Lekki, Lagos</div>
-            <div class="hero-stat">~1 Hour Prep</div>
-          </div>
+    <!-- ========== HERO ========== -->
+    <section id="home" class="hero">
+      <div class="hero-content">
+        <h1>Freshly Made <span>Gizdodo</span> &amp; More</h1>
+        <p class="hero-subtitle">At GIZDODOSPECIALS, we serve up tasty Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo &amp; Chicken Feet Mix plus delicious extras and refreshing drinks to complete your meal. Prepared fresh in Lekki, Lagos.</p>
+        <div class="hero-actions">
+          <a href="#menu" class="btn btn-primary">Order Now</a>
+          <a href="#track" class="btn btn-outline">Track Order</a>
         </div>
-      </section>
-
-      <!-- Business Info -->
-      <section class="biz-info animate-on-scroll">
-        <div class="biz-info-card">
-          <h2>A Note From Us</h2>
-          <p>Our meals and sides are freshly prepared to order to ensure you enjoy them at their best. Preparation time: Approximately 1 hour. Delivery begins immediately after your meal has been prepared.</p>
-          <p class="hours">Monday – Saturday: 10:00 AM – 8:00 PM</p>
-          <p class="thanks">Thank you for choosing us and for always supporting GizdodoSpecials. We truly appreciate you!</p>
+        <div class="hero-stats">
+          <div class="hero-stat">6 Delicious Dishes</div>
+          <div class="hero-stat">Fresh Daily</div>
+          <div class="hero-stat">Lekki, Lagos</div>
+          <div class="hero-stat">~1 Hour Prep</div>
         </div>
-      </section>
-
-      <!-- Why Choose Us -->
-      <section class="why-choose animate-on-scroll">
-        <div class="why-choose-heading">
-          <h2>Why Choose Us</h2>
-        </div>
-        <div class="why-choose-grid">
-          <div class="why-card animate-on-scroll">
-            <div class="why-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
-            <h3>Freshly Prepared</h3>
-            <p>Every meal is made to order with fresh ingredients, so you always get the best flavour.</p>
-          </div>
-          <div class="why-card animate-on-scroll">
-            <div class="why-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-            <h3>Made with Love</h3>
-            <p>Each dish is crafted with care and passion — because food made with love tastes better.</p>
-          </div>
-          <div class="why-card animate-on-scroll">
-            <div class="why-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-            <h3>Fast Delivery</h3>
-            <p>Once your meal is ready, we get it to your doorstep in Lekki as quickly as possible.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- CTA -->
-      <section class="cta-section animate-on-scroll">
-        <h2>Ready to Order?</h2>
-        <p>Choose from our selection of freshly prepared Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo and more.</p>
-        <button class="btn btn-primary" onclick="setView('menu')">Order Now</button>
-      </section>
-
+      </div>
     </section>
 
-    <!-- ========== MENU VIEW ========== -->
-    <section id="view-menu" class="view-section" aria-label="Menu">
-      <section class="menu-section">
-        <div class="menu-container">
-          <div class="menu-heading">
-            <h2>Our Menu</h2>
-          </div>
-          <p class="menu-subtitle">Fresh, flavourful &amp; made with love</p>
-
-          <!-- Tier Tabs -->
-          <div class="tier-tabs" role="tablist" aria-label="Meal tier selection">
-            <button class="tier-tab active" data-tier="regular" role="tab" aria-selected="true" onclick="setTier('regular')">Regular</button>
-            <button class="tier-tab" data-tier="maxi" role="tab" aria-selected="false" onclick="setTier('maxi')">Maxi</button>
-            <button class="tier-tab" data-tier="combo" role="tab" aria-selected="false" onclick="setTier('combo')">Special Combo</button>
-          </div>
-
-          <!-- Category Sub-Tabs -->
-          <div class="category-tabs" role="tablist" aria-label="Food category filter">
-            <button class="category-tab active" data-cat="all" role="tab" onclick="setCategory('all')">All</button>
-            <button class="category-tab" data-cat="mains" role="tab" onclick="setCategory('mains')">Mains</button>
-            <button class="category-tab" data-cat="addons" role="tab" onclick="setCategory('addons')">Add-ons</button>
-            <button class="category-tab" data-cat="drinks" role="tab" onclick="setCategory('drinks')">Drinks</button>
-          </div>
-
-          <!-- Mains Grid -->
-          <div id="mains-section-wrap">
-            <h3 class="section-heading">Mains</h3>
-            <div class="product-grid" id="mains-grid" role="list" aria-label="Main dishes"></div>
-          </div>
-
-          <!-- Add-ons Grid -->
-          <div id="addons-section-wrap">
-            <h3 class="section-heading" style="margin-top:40px;">Add-ons <span style="font-size:12px;color:var(--destructive);font-weight:600;margin-left:8px;">Only available with Maxi</span></h3>
-            <div class="mini-grid" id="addons-grid" role="list" aria-label="Add-on items"></div>
-          </div>
-
-          <!-- Drinks Grid -->
-          <div id="drinks-section-wrap">
-            <h3 class="section-heading" style="margin-top:40px;">Drinks</h3>
-            <div class="mini-grid" id="drinks-grid" role="list" aria-label="Drinks"></div>
-          </div>
-
-        </div>
-      </section>
+    <!-- ========== BUSINESS INFO ========== -->
+    <section class="biz-info animate-on-scroll">
+      <div class="biz-info-card">
+        <h2>A Note From Us</h2>
+        <p>Our meals and sides are freshly prepared to order to ensure you enjoy them at their best. Preparation time: Approximately 1 hour. Delivery begins immediately after your meal has been prepared.</p>
+        <p class="hours">Monday – Saturday: 10:00 AM – 8:00 PM</p>
+        <p class="thanks">Thank you for choosing us and for always supporting GizdodoSpecials. We truly appreciate you!</p>
+      </div>
     </section>
 
-    <!-- ========== TRACK ORDER VIEW ========== -->
-    <section id="view-track" class="view-section" aria-label="Track Order">
-      <section class="track-section">
-        <div class="track-container">
-          <div class="track-heading">
-            <h2>Track Your Order</h2>
-          </div>
-          <p class="track-subtitle">Enter your order number to see real-time status</p>
-
-          <div class="track-search">
-            <input type="text" id="track-input" placeholder="e.g. GZ-20260115-1234" aria-label="Order number">
-            <button class="btn btn-primary" onclick="handleTrackOrder()">Track</button>
-          </div>
-
-          <div class="track-error" id="track-error" style="display:none;"></div>
-
-          <div id="track-result"></div>
+    <!-- ========== MENU (on homepage) ========== -->
+    <section id="menu" class="menu-section">
+      <div class="menu-container">
+        <div class="menu-heading">
+          <h2>Our Menu</h2>
         </div>
-      </section>
+        <p class="menu-subtitle">Fresh, flavourful &amp; made with love</p>
+
+        <!-- Category Filter -->
+        <div class="category-tabs" role="tablist" aria-label="Food category filter">
+          <button class="category-tab active" data-cat="all" role="tab" onclick="setCategory('all')">All</button>
+          <button class="category-tab" data-cat="mains" role="tab" onclick="setCategory('mains')">Mains</button>
+          <button class="category-tab" data-cat="addons" role="tab" onclick="setCategory('addons')">Add-ons</button>
+          <button class="category-tab" data-cat="drinks" role="tab" onclick="setCategory('drinks')">Drinks</button>
+        </div>
+
+        <!-- Mains Grid (rendered by JS with per-product tier tabs) -->
+        <div id="mains-section-wrap">
+          <h3 class="section-heading">Mains</h3>
+          <div class="product-grid" id="mains-grid" role="list" aria-label="Main dishes"></div>
+        </div>
+
+        <!-- Add-ons -->
+        <div id="addons-section-wrap">
+          <h3 class="section-heading" style="margin-top:40px;">Add-ons <span style="font-size:12px;color:var(--destructive);font-weight:600;margin-left:8px;">Only available with Maxi</span></h3>
+          <div class="mini-grid" id="addons-grid" role="list" aria-label="Add-on items"></div>
+        </div>
+
+        <!-- Drinks -->
+        <div id="drinks-section-wrap">
+          <h3 class="section-heading" style="margin-top:40px;">Drinks</h3>
+          <div class="mini-grid" id="drinks-grid" role="list" aria-label="Drinks"></div>
+        </div>
+
+      </div>
     </section>
 
-    <!-- ========== CONTACT VIEW ========== -->
-    <section id="view-contact" class="view-section" aria-label="Contact Us">
-      <section class="contact-section">
-        <div class="contact-container">
-          <div class="contact-heading">
-            <h2>Contact Us</h2>
-          </div>
-          <p class="contact-subtitle">Have questions or want to place a bulk order? Reach out to us.</p>
-
-          <div class="contact-grid">
-            <div class="contact-card animate-on-scroll">
-              <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-              <h3>Phone / WhatsApp</h3>
-              <p>Place orders or inquiries via WhatsApp for the fastest response.</p>
-              <p style="color:var(--primary);font-weight:600;font-size:14px;margin-top:12px;">WhatsApp Available</p>
-            </div>
-            <div class="contact-card animate-on-scroll">
-              <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-              <h3>Email</h3>
-              <p>For partnerships, bulk orders, or any inquiries.</p>
-              <a href="mailto:gizdodospecials@gmail.com">gizdodospecials@gmail.com</a>
-            </div>
-            <div class="contact-card animate-on-scroll">
-              <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-              <h3>Location</h3>
-              <p>Visit our kitchen in Lekki, Lagos.</p>
-              <a href="#">Find us on Google Maps</a>
-            </div>
-            <div class="contact-card animate-on-scroll">
-              <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-              <h3>Opening Hours</h3>
-              <p>Monday – Saturday: 10:00 AM – 8:00 PM</p>
-              <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">Closed on Sundays</p>
-            </div>
-          </div>
-
-          <!-- Payment Info -->
-          <div class="payment-info-card animate-on-scroll">
-            <div class="payment-info-card-header">
-              <div class="icon-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
-              <h3>Payment Details</h3>
-            </div>
-            <p>Transfer the exact order total to the account below when placing your order.</p>
-            <div class="payment-info-row"><span class="label">Bank</span><span class="value">GTBank</span></div>
-            <div class="payment-info-row"><span class="label">Account Number</span><span class="value mono">3005029891</span></div>
-            <div class="payment-info-row"><span class="label">Account Name</span><span class="value">Gizdodo Special Hub</span></div>
-          </div>
-
+    <!-- ========== WHY CHOOSE US ========== -->
+    <section class="why-choose animate-on-scroll">
+      <div class="why-choose-heading">
+        <h2>Why Choose Us</h2>
+      </div>
+      <div class="why-choose-grid">
+        <div class="why-card animate-on-scroll">
+          <div class="why-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+          <h3>Freshly Prepared</h3>
+          <p>Every meal is made to order with fresh ingredients, so you always get the best flavour.</p>
         </div>
-      </section>
+        <div class="why-card animate-on-scroll">
+          <div class="why-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <h3>Made with Love</h3>
+          <p>Each dish is crafted with care and passion — because food made with love tastes better.</p>
+        </div>
+        <div class="why-card animate-on-scroll">
+          <div class="why-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+          <h3>Fast Delivery</h3>
+          <p>Once your meal is ready, we get it to your doorstep in Lekki as quickly as possible.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CTA ========== -->
+    <section class="cta-section animate-on-scroll">
+      <h2>Ready to Order?</h2>
+      <p>Choose from our selection of freshly prepared Gizdodo, Beefdodo, Chickendodo, Turkeydodo, Snaildodo and more.</p>
+      <a href="#menu" class="btn btn-primary">Order Now</a>
+    </section>
+
+    <!-- ========== TRACK ORDER ========== -->
+    <section id="track" class="track-section">
+      <div class="track-container">
+        <div class="track-heading">
+          <h2>Track Your Order</h2>
+        </div>
+        <p class="track-subtitle">Enter your order number to see real-time status</p>
+
+        <div class="track-search">
+          <input type="text" id="track-input" placeholder="e.g. GZ-20260115-1234" aria-label="Order number">
+          <button class="btn btn-primary" onclick="handleTrackOrder()">Track</button>
+        </div>
+
+        <div class="track-error" id="track-error" style="display:none;"></div>
+
+        <div id="track-result"></div>
+      </div>
+    </section>
+
+    <!-- ========== CONTACT ========== -->
+    <section id="contact" class="contact-section">
+      <div class="contact-container">
+        <div class="contact-heading">
+          <h2>Contact Us</h2>
+        </div>
+        <p class="contact-subtitle">Have questions or want to place a bulk order? Reach out to us.</p>
+
+        <div class="contact-grid">
+          <div class="contact-card animate-on-scroll">
+            <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <h3>Phone / WhatsApp</h3>
+            <p>Place orders or inquiries via WhatsApp for the fastest response.</p>
+            <p style="color:var(--primary);font-weight:600;font-size:14px;margin-top:12px;">WhatsApp Available</p>
+          </div>
+          <div class="contact-card animate-on-scroll">
+            <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <h3>Email</h3>
+            <p>For partnerships, bulk orders, or any inquiries.</p>
+            <a href="mailto:gizdodospecials@gmail.com">gizdodospecials@gmail.com</a>
+          </div>
+          <div class="contact-card animate-on-scroll">
+            <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <h3>Location</h3>
+            <p>Visit our kitchen in Lekki, Lagos.</p>
+            <a href="#">Find us on Google Maps</a>
+          </div>
+          <div class="contact-card animate-on-scroll">
+            <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <h3>Opening Hours</h3>
+            <p>Monday – Saturday: 10:00 AM – 8:00 PM</p>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:8px;">Closed on Sundays</p>
+          </div>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="payment-info-card animate-on-scroll">
+          <div class="payment-info-card-header">
+            <div class="icon-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+            <h3>Payment Details</h3>
+          </div>
+          <p>Transfer the exact order total to the account below when placing your order.</p>
+          <div class="payment-info-row"><span class="label">Bank</span><span class="value">GTBank</span></div>
+          <div class="payment-info-row"><span class="label">Account Number</span><span class="value mono">3005029891</span></div>
+          <div class="payment-info-row"><span class="label">Account Name</span><span class="value">Gizdodo Special Hub</span></div>
+        </div>
+
+      </div>
     </section>
 
   </main>
@@ -329,9 +311,9 @@
       <div class="footer-col">
         <h4>Quick Links</h4>
         <ul>
-          <li><a href="#menu" onclick="setView('menu'); return false;">Order Now</a></li>
-          <li><a href="#track" onclick="setView('track'); return false;">Track Order</a></li>
-          <li><a href="#contact" onclick="setView('contact'); return false;">Contact Us</a></li>
+          <li><a href="#menu">Order Now</a></li>
+          <li><a href="#track">Track Order</a></li>
+          <li><a href="#contact">Contact Us</a></li>
         </ul>
       </div>
       <div class="footer-col">
