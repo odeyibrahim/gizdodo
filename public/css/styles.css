@@ -540,30 +540,50 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   margin-bottom: 32px;
 }
 
-/* Tier tabs */
-.tier-tabs {
+/* Per-product tier radio buttons */
+.product-tier-radios {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 36px;
-  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
 }
-.tier-tab {
-  padding: 10px 24px;
-  font-size: 14px;
+.ptier-radio {
+  padding: 4px 10px;
+  font-size: 11px;
   font-weight: 700;
+  font-family: var(--font);
   border-radius: var(--radius-full);
-  color: var(--text);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  line-height: 1.3;
 }
-.tier-tab:hover { border-color: rgba(232,163,23,0.5); background: #FFF8EC; }
-.tier-tab.active {
+.ptier-radio:hover:not(.disabled):not(.active) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.ptier-radio.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+.ptier-radio.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: transparent;
+}
+
+/* Combo label (shown under radios) */
+.combo-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  line-height: 1.3;
 }
 
 /* Category sub-tabs */
@@ -626,6 +646,21 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.3s ease;
+}
+/* Tier-based image area gradients */
+.product-card.tier-regular .product-card-image {
+  background: linear-gradient(135deg, #FFF8EC 0%, #FCEABB 50%, #F5D78E 100%);
+}
+.product-card.tier-maxi .product-card-image {
+  background: linear-gradient(135deg, #FFF0F0 0%, #FECACA 50%, #F8A0A0 100%);
+}
+.product-card.tier-combo .product-card-image {
+  background: linear-gradient(135deg, #2D1B00 0%, #4A3000 50%, #6B4700 100%);
+}
+.product-card.tier-combo .product-card-image .placeholder-icon {
+  color: var(--primary-pale);
+  opacity: 0.6;
 }
 .product-card-image img {
   width: 100%;
@@ -658,6 +693,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   font-size: 12px;
   font-weight: 600;
   color: var(--destructive);
+}
+/* Ensure notice always visible even inside card flow */
+.product-card-body .addon-notice {
+  margin-top: 2px;
 }
 .product-price {
   font-size: 15px;
@@ -1688,8 +1727,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 /* ============================================
    VIEW SECTIONS (hidden/shown by JS)
    ============================================ */
-.view-section { display: none; }
-.view-section.active { display: block; }
+/* View sections removed — single-page scroll layout */
 
 /* ============================================
    PRINT STYLES
@@ -1698,7 +1736,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   .navbar, .footer, .cart-drawer, .cart-drawer-overlay,
   .checkout-sheet, .checkout-overlay, .mobile-nav,
   .mobile-nav-overlay, .toast-container, .btn { display: none !important; }
-  .view-section { display: block !important; }
+  .product-card, .mini-card, .contact-card, .why-card, .biz-info-card, .track-card { break-inside: avoid; }
   body { color: #000; background: #fff; }
 }
 
