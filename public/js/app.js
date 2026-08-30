@@ -1,6 +1,6 @@
 /* ============================================
    GIZDODOSPECIALS — Customer App Logic
-   Faithful port of V3 (Zustand + React) → vanilla JS
+   Single-page scroll · Per-product tier radios
    ============================================ */
 (function () {
   'use strict';
@@ -8,7 +8,7 @@
   /* --------------------------------------------
      CONFIG
   -------------------------------------------- */
-  const CONFIG = {
+  var CONFIG = {
     WHATSAPP_PHONE: '+2349023731643',
     BANK_NAME: 'GTBank',
     BANK_ACCOUNT: '3005029891',
@@ -17,7 +17,6 @@
     SUPABASE_KEY: '',
   };
 
-  // Inject env vars if available (Netlify injects window.ENV)
   if (window.ENV) {
     Object.assign(CONFIG, window.ENV);
   }
@@ -25,39 +24,24 @@
   /* --------------------------------------------
      SVG ICONS (inline, no external dep)
   -------------------------------------------- */
-  const ICONS = {
+  var ICONS = {
     shoppingBag: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
     plus: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     minus: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     x: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-    menu: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
-    arrowLeft: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
-    search: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
     check: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
     checkCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-    leaf: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
-    heart: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-    truck: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
-    phone: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-    mail: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
-    mapPin: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
-    clock: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-    store: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    utensils: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>',
     creditCard: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
     chefHat: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
     package: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
-    landmark: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>',
-    loader: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>',
-    instagram: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>',
-    music: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-    messageCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
-    utensils: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>',
+    truck: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
   };
 
   /* --------------------------------------------
-     PRODUCT DATA (from V3 seed.ts)
+     PRODUCT DATA
   -------------------------------------------- */
-  const PRODUCTS = [
+  var PRODUCTS = [
     { id: 'gizdodo', name: 'Gizdodo', description: 'Our signature dish — perfectly fried plantain (dodo) paired with sautéed gizzard in a rich, spicy sauce. A Lagos favourite.', category: 'mains', acceptsAddons: true, regular: 9000, maxi: 15000, combo: 17000, comboLabel: 'Gizdodo + Spaghetti', images: { regular: '', maxi: '', combo: '' } },
     { id: 'chickendodo', name: 'Chickendodo', description: 'Crispy fried plantain served with succulent, well-seasoned chicken in our special sauce.', category: 'mains', acceptsAddons: true, regular: 9000, maxi: 15000, combo: 18000, comboLabel: 'Chickendodo + Special Toppings', images: { regular: '', maxi: '', combo: '' } },
     { id: 'turkeydodo', name: 'Turkeydodo', description: 'Juicy smoked turkey paired with golden fried plantain and our signature savoury sauce.', category: 'mains', acceptsAddons: true, regular: 10000, maxi: 17000, combo: 20000, comboLabel: 'Turkeydodo + Extra Cheese', images: { regular: '', maxi: '', combo: '' } },
@@ -66,7 +50,7 @@
     { id: 'chickenfeet', name: 'Chicken Feet Mix', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain.', category: 'mains', acceptsAddons: true, regular: 9000, maxi: 13000, combo: null, comboLabel: null, images: { regular: '', maxi: '', combo: '' } },
   ];
 
-  const ADDONS = [
+  var ADDONS = [
     { id: 'pasta', name: 'Pasta', description: 'Well-cooked pasta to pair with your Maxi meal.', price: 2000 },
     { id: 'spaghetti', name: 'Spaghetti', description: 'Classic spaghetti, perfectly boiled.', price: 2000 },
     { id: 'noodles', name: 'Noodles', description: 'Soft and tasty noodles.', price: 2000 },
@@ -75,18 +59,16 @@
     { id: 'toppings', name: 'Special Topping Mix', description: 'Our exclusive blend of premium toppings.', price: 3000 },
   ];
 
-  const DRINKS = [
+  var DRINKS = [
     { id: 'pineapple', name: 'Pineapple Juice', price: 3000 },
     { id: 'pineapple-ginger', name: 'Pineapple + Ginger Juice', price: 3000 },
     { id: 'chapman', name: 'Chapman', price: 3000 },
   ];
 
   /* --------------------------------------------
-     STATE (replaces Zustand)
+     STATE
   -------------------------------------------- */
-  const state = {
-    currentView: 'home',
-    tier: 'regular',
+  var state = {
     categoryFilter: 'all',
     cart: [],
     mobileNavOpen: false,
@@ -94,9 +76,13 @@
     checkoutOpen: false,
     addonPickerOpen: false,
     pendingCartItem: null,
-    selectedAddonIds: new Set(),
-    trackingInput: '',
+    selectedAddonIds: {},
+    // Per-product selected tier (default: regular)
+    productTiers: {},
   };
+
+  // Initialize per-product tiers
+  PRODUCTS.forEach(function (p) { state.productTiers[p.id] = 'regular'; });
 
   /* --------------------------------------------
      HELPERS
@@ -131,8 +117,18 @@
     return Math.floor(hrs / 24) + 'd ago';
   }
 
+  function getPriceForTier(product, tier) {
+    if (tier === 'maxi') return product.maxi;
+    if (tier === 'combo') return product.combo || product.maxi;
+    return product.regular;
+  }
+
+  function getTierLabel(tier) {
+    return tier === 'regular' ? 'Regular' : tier === 'maxi' ? 'Maxi' : 'Special Combo';
+  }
+
   /* --------------------------------------------
-     TOAST (replaces Sonner)
+     TOAST
   -------------------------------------------- */
   function toast(message, type) {
     type = type || 'success';
@@ -140,40 +136,12 @@
     var el = document.createElement('div');
     el.className = 'toast ' + type;
     var iconName = type === 'success' ? 'checkCircle' : 'x';
-    el.innerHTML = '<span class="toast-icon">' + ICONS[iconName] + '</span><span>' + message + '</span>';
+    el.innerHTML = '<span class="toast-icon">' + (ICONS[iconName] || ICONS.checkCircle) + '</span><span>' + message + '</span>';
     container.appendChild(el);
     setTimeout(function () {
       el.style.animation = 'toastOut 0.3s ease forwards';
       setTimeout(function () { el.remove(); }, 300);
     }, 4000);
-  }
-
-  /* --------------------------------------------
-     VIEW ROUTING
-  -------------------------------------------- */
-  function setView(view) {
-    state.currentView = view;
-    state.mobileNavOpen = false;
-    closeMobileNav();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Update URL hash
-    if (view === 'home') history.pushState('', '', window.location.pathname);
-    else window.location.hash = view;
-    renderView();
-  }
-
-  function renderView() {
-    var sections = document.querySelectorAll('.view-section');
-    for (var i = 0; i < sections.length; i++) {
-      sections[i].classList.remove('active');
-    }
-    var target = document.getElementById('view-' + state.currentView);
-    if (target) target.classList.add('active');
-    // Update nav active states
-    var navLinks = document.querySelectorAll('[data-nav]');
-    for (var j = 0; j < navLinks.length; j++) {
-      navLinks[j].classList.toggle('active', navLinks[j].getAttribute('data-nav') === state.currentView);
-    }
   }
 
   /* --------------------------------------------
@@ -267,7 +235,7 @@
       container.innerHTML = '<div class="cart-empty">' +
         '<div class="cart-empty-icon">' + ICONS.shoppingBag + '</div>' +
         '<p>Your cart is empty</p>' +
-        '<button class="btn btn-outline btn-sm" onclick="closeCart(); setView(\'menu\')">Browse Menu</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="closeCart(); document.getElementById(\'menu\').scrollIntoView({behavior:\'smooth\'})">Browse Menu</button>' +
         '</div>';
       document.getElementById('cart-footer').style.display = 'none';
       return;
@@ -279,7 +247,8 @@
       var addonsTotal = item.addOns.reduce(function (s, a) { return s + a.price; }, 0);
       var unitTotal = item.price + addonsTotal;
       var lineTotal = unitTotal * item.quantity;
-      var tierBadge = item.tier !== 'regular' ? '<span class="cart-item-badge">' + (item.tier === 'maxi' ? 'Maxi' : item.comboLabel || 'Combo') + '</span>' : '';
+      var tierBadge = item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
+        ? '<span class="cart-item-badge">' + (item.comboLabel || getTierLabel(item.tier)) + '</span>' : '';
       var addonsText = item.addOns.length > 0 ? '<p class="cart-item-addons">+ ' + item.addOns.map(function (a) { return a.name; }).join(', ') + '</p>' : '';
       html += '<div class="cart-item">' +
         '<div class="cart-item-img"><span class="placeholder-icon">' + ICONS.utensils + '</span></div>' +
@@ -304,25 +273,24 @@
   }
 
   /* --------------------------------------------
-     MENU RENDERING
+     PER-PRODUCT TIER SELECTION
   -------------------------------------------- */
-  function setTier(tier) {
-    state.tier = tier;
-    renderTierTabs();
+  function setProductTier(productId, tier) {
+    var product = PRODUCTS.find(function (p) { return p.id === productId; });
+    if (!product) return;
+    // Don't allow combo if product has no combo
+    if (tier === 'combo' && !product.combo) return;
+    state.productTiers[productId] = tier;
     renderMenu();
   }
 
+  /* --------------------------------------------
+     MENU RENDERING
+  -------------------------------------------- */
   function setCategory(cat) {
     state.categoryFilter = cat;
     renderCategoryTabs();
     renderMenu();
-  }
-
-  function renderTierTabs() {
-    var tabs = document.querySelectorAll('.tier-tab');
-    for (var i = 0; i < tabs.length; i++) {
-      tabs[i].classList.toggle('active', tabs[i].getAttribute('data-tier') === state.tier);
-    }
   }
 
   function renderCategoryTabs() {
@@ -332,51 +300,62 @@
     }
   }
 
-  function getPrice(product) {
-    if (state.tier === 'regular') return product.regular;
-    if (state.tier === 'maxi') return product.maxi;
-    if (state.tier === 'combo') return product.combo || product.maxi;
-    return product.regular;
-  }
-
-  function getTierLabel(tier) {
-    return tier === 'regular' ? 'Regular' : tier === 'maxi' ? 'Maxi' : 'Special Combo';
-  }
-
   function renderMenu() {
     var mainsContainer = document.getElementById('mains-grid');
     var addonsContainer = document.getElementById('addons-grid');
     var drinksContainer = document.getElementById('drinks-grid');
-    var addonsSection = document.getElementById('addons-section');
 
-    // Mains
+    // ---- Mains ----
     var mainsHtml = '';
     PRODUCTS.forEach(function (p) {
-      var price = getPrice(p);
-      var imgUrl = p.images[state.tier] || '';
+      var tier = state.productTiers[p.id] || 'regular';
+      var price = getPriceForTier(p, tier);
+      var imgUrl = p.images[tier] || '';
       var imgHtml = imgUrl
-        ? '<img src="' + imgUrl + '" alt="' + p.name + ' - ' + getTierLabel(state.tier) + '" loading="lazy">'
+        ? '<img src="' + imgUrl + '" alt="' + p.name + ' - ' + getTierLabel(tier) + '" loading="lazy">'
         : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
+
+      // Tier radio buttons
+      var hasCombo = !!p.combo;
+      var radiosHtml = '<div class="product-tier-radios" role="radiogroup" aria-label="' + p.name + ' tier">';
+      ['regular', 'maxi', 'combo'].forEach(function (t) {
+        var isDisabled = (t === 'combo' && !hasCombo);
+        var isActive = (t === tier);
+        var label = t === 'combo' ? 'Special Combo' : t.charAt(0).toUpperCase() + t.slice(1);
+        var cls = 'ptier-radio' + (isActive ? ' active' : '') + (isDisabled ? ' disabled' : '');
+        radiosHtml += '<button class="' + cls + '" role="radio" aria-checked="' + isActive + '"' +
+          (isDisabled ? ' disabled aria-disabled="true"' : '') +
+          ' onclick="setProductTier(\'' + p.id + '\',\'' + t + '\')">' + label + '</button>';
+      });
+      radiosHtml += '</div>';
+
+      // Combo info (shows under the tier radios when combo is selected)
+      var comboInfo = (tier === 'combo' && p.comboLabel)
+        ? '<p class="combo-label">' + p.comboLabel + '</p>'
+        : '';
+
+      // Add-ons notice (always visible for products that accept addons)
       var addonNotice = p.acceptsAddons
         ? '<span class="addon-notice">+ Add-ons available with Maxi</span>'
         : '';
-      var comboInfo = state.tier === 'combo' && p.comboLabel
-        ? '<p class="combo-desc" style="font-size:12px;color:var(--primary);font-weight:600;margin-top:4px;">' + p.comboLabel + '</p>'
-        : '';
-      var btnLabel = state.tier === 'combo' && !p.combo
-        ? 'Unavailable'
-        : 'Add to Order · ' + formatPrice(price);
-      var btnDisabled = (state.tier === 'combo' && !p.combo) ? ' disabled' : '';
-      var btnAction = (state.tier === 'combo' && !p.combo)
-        ? ''
-        : ' onclick="handleAddToCart(\'' + p.id + '\')"';
 
-      mainsHtml += '<div class="product-card">' +
-        '<div class="product-card-image" data-product-id="' + p.id + '">' + imgHtml + '</div>' +
+      // Tier gradient class on card
+      var tierClass = 'tier-' + tier;
+
+      // Button
+      var isUnavailable = (tier === 'combo' && !p.combo);
+      var btnLabel = isUnavailable ? 'Unavailable' : 'Add to Order \u00B7 ' + formatPrice(price);
+      var btnDisabled = isUnavailable ? ' disabled' : '';
+      var btnAction = isUnavailable ? '' : ' onclick="handleAddToCart(\'' + p.id + '\')"';
+
+      mainsHtml += '<div class="product-card ' + tierClass + '" data-product-id="' + p.id + '">' +
+        '<div class="product-card-image">' + imgHtml + '</div>' +
         '<div class="product-card-body">' +
+          radiosHtml +
+          comboInfo +
           '<h4>' + p.name + '</h4>' +
           '<p class="desc">' + p.description + '</p>' +
-          addonNotice + comboInfo +
+          addonNotice +
           '<p class="product-price">' + formatPrice(price) + '</p>' +
         '</div>' +
         '<button class="btn btn-primary" style="width:100%"' + btnDisabled + btnAction + '>' + btnLabel + '</button>' +
@@ -384,17 +363,7 @@
     });
     mainsContainer.innerHTML = mainsHtml;
 
-    // Add-ons section visibility — always visible, but only functional for maxi
-    if (addonsSection) {
-      addonsSection.style.display = 'block';
-      if (state.categoryFilter === 'all' || state.categoryFilter === 'addons') {
-        addonsSection.style.display = 'block';
-      } else {
-        addonsSection.style.display = 'none';
-      }
-    }
-
-    // Add-ons
+    // ---- Add-ons ----
     var addonsHtml = '';
     ADDONS.forEach(function (a) {
       addonsHtml += '<div class="mini-card">' +
@@ -404,7 +373,7 @@
     });
     addonsContainer.innerHTML = addonsHtml;
 
-    // Drinks
+    // ---- Drinks ----
     var drinksHtml = '';
     DRINKS.forEach(function (d) {
       drinksHtml += '<div class="mini-card">' +
@@ -414,9 +383,11 @@
     });
     drinksContainer.innerHTML = drinksHtml;
 
-    // Category section visibility
+    // ---- Category section visibility ----
+    var mainsWrap = document.getElementById('mains-section-wrap');
     var addonsWrap = document.getElementById('addons-section-wrap');
     var drinksWrap = document.getElementById('drinks-section-wrap');
+    if (mainsWrap) mainsWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'mains') ? 'block' : 'none';
     if (addonsWrap) addonsWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'addons') ? 'block' : 'none';
     if (drinksWrap) drinksWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'drinks') ? 'block' : 'none';
   }
@@ -427,19 +398,20 @@
   function handleAddToCart(productId) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
-    var price = getPrice(product);
+    var tier = state.productTiers[productId] || 'regular';
+    var price = getPriceForTier(product, tier);
 
     // If maxi and acceptsAddons, open addon picker
-    if (state.tier === 'maxi' && product.acceptsAddons) {
+    if (tier === 'maxi' && product.acceptsAddons) {
       state.pendingCartItem = {
         productId: product.id,
         name: product.name,
         price: price,
-        tier: state.tier,
-        comboLabel: product.comboLabel,
+        tier: tier,
+        comboLabel: null,
         addOns: [],
       };
-      state.selectedAddonIds = new Set();
+      state.selectedAddonIds = {};
       openAddonPicker();
       return;
     }
@@ -448,8 +420,8 @@
       productId: product.id,
       name: product.name,
       price: price,
-      tier: state.tier,
-      comboLabel: state.tier === 'combo' ? product.comboLabel : null,
+      tier: tier,
+      comboLabel: tier === 'combo' ? product.comboLabel : null,
       addOns: [],
     });
     toast(product.name + ' added to cart');
@@ -501,8 +473,8 @@
   }
 
   function toggleAddon(addonId) {
-    if (state.selectedAddonIds.has(addonId)) state.selectedAddonIds.delete(addonId);
-    else state.selectedAddonIds.add(addonId);
+    if (state.selectedAddonIds[addonId]) delete state.selectedAddonIds[addonId];
+    else state.selectedAddonIds[addonId] = true;
     renderAddonPicker();
   }
 
@@ -512,11 +484,11 @@
     var addonsTotal = 0;
     var html = '';
     ADDONS.forEach(function (a) {
-      var selected = state.selectedAddonIds.has(a.id);
+      var selected = !!state.selectedAddonIds[a.id];
       if (selected) addonsTotal += a.price;
       html += '<div class="addon-item' + (selected ? ' selected' : '') + '" onclick="toggleAddon(\'' + a.id + '\')">' +
-        '<div class="addon-check">' + ICONS.check + '</div>' +
-        '<div class="addon-info"><p class="name">' + a.name + '</p><p class="price">' + formatPrice(a.price) + '</p></div>' +
+        '<div class="addon-check">' + (selected ? ICONS.check : '') + '</div>' +
+        '<div class="addon-info"><p class="name">' + a.name + '</p><p class="desc">' + a.description + '</p><p class="price">' + formatPrice(a.price) + '</p></div>' +
       '</div>';
     });
     container.innerHTML = html;
@@ -525,7 +497,7 @@
 
   function confirmAddonPicker() {
     if (!state.pendingCartItem) return;
-    var selectedAddons = ADDONS.filter(function (a) { return state.selectedAddonIds.has(a.id); }).map(function (a) { return { name: a.name, price: a.price }; });
+    var selectedAddons = ADDONS.filter(function (a) { return !!state.selectedAddonIds[a.id]; }).map(function (a) { return { name: a.name, price: a.price }; });
     addToCart(Object.assign({}, state.pendingCartItem, { addOns: selectedAddons }));
     toast(state.pendingCartItem.name + ' added to cart');
     closeAddonPicker();
@@ -561,7 +533,6 @@
     document.getElementById('checkout-amount').textContent = formatPrice(total);
     document.getElementById('checkout-confirm-amount').textContent = formatPrice(total);
 
-    // Order summary
     var summaryHtml = '';
     state.cart.forEach(function (item) {
       var addonsTotal = item.addOns.reduce(function (s, a) { return s + a.price; }, 0);
@@ -570,7 +541,7 @@
         ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.comboLabel || getTierLabel(item.tier)) + ')</span>' : '';
       var addonsStr = item.addOns.length > 0 ? '<p class="item-addons">+ ' + item.addOns.map(function (a) { return a.name; }).join(', ') + '</p>' : '';
       summaryHtml += '<div class="order-summary-item">' +
-        '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">×' + item.quantity + '</span>' + addonsStr + '</div>' +
+        '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + addonsStr + '</div>' +
         '<span class="item-total">' + formatPrice(unitTotal * item.quantity) + '</span>' +
       '</div>';
     });
@@ -612,12 +583,12 @@
       var tierStr = item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
         ? ' (' + (item.comboLabel || getTierLabel(item.tier)) + ')' : '';
       var addonsStr = item.addOns.length > 0 ? ' + ' + item.addOns.map(function (a) { return a.name; }).join(', ') : '';
-      msg += '• ' + item.name + tierStr + addonsStr + ' ×' + item.quantity + ' = ' + formatPrice((item.price + item.addOns.reduce(function (s, a) { return s + a.price; }, 0)) * item.quantity) + '%0A';
+      msg += '\u2022 ' + item.name + tierStr + addonsStr + ' \u00D7' + item.quantity + ' = ' + formatPrice((item.price + item.addOns.reduce(function (s, a) { return s + a.price; }, 0)) * item.quantity) + '%0A';
     });
     msg += '%0A*Total: ' + formatPrice(total) + '*%0A';
     msg += '%0APayment made to ' + CONFIG.BANK_NAME + ' ' + CONFIG.BANK_ACCOUNT + ' (' + CONFIG.BANK_ACC_NAME + ')';
 
-    // Also save to Supabase if configured
+    // Save to Supabase if configured
     if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
       saveOrderToSupabase({ name: name, phone: phone, email: email, deliveryType: deliveryType, address: address, area: area, notes: notes, total: total });
     }
@@ -676,7 +647,7 @@
 
   function closeSuccessModal() {
     document.getElementById('success-modal').classList.remove('open');
-    setView('home');
+    document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
   }
 
   /* --------------------------------------------
@@ -692,11 +663,10 @@
     container.innerHTML = '';
     errorEl.style.display = 'none';
 
-    // Show loading
     container.innerHTML = '<div style="text-align:center;padding:40px;"><div class="skeleton" style="width:60%;height:20px;margin:0 auto 12px;"></div><div class="skeleton" style="width:40%;height:16px;margin:0 auto;"></div></div>';
 
     if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_KEY) {
- errorEl.textContent = 'Order tracking requires Supabase configuration. Please contact us on WhatsApp for order updates.';
+      errorEl.textContent = 'Order tracking requires Supabase configuration. Please contact us on WhatsApp for order updates.';
       errorEl.style.display = 'block';
       container.innerHTML = '';
       return;
@@ -744,16 +714,14 @@
     var items = [];
     try { items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []); } catch (e) { items = []; }
 
-    // Items HTML
     var itemsHtml = '';
     items.forEach(function (item) {
       var itemTotal = (item.price + item.addOns.reduce(function (s, a) { return s + a.price; }, 0)) * item.quantity;
       var tierStr = item.tier && item.tier !== 'regular' && item.tier !== 'addon' && item.tier !== 'drink'
         ? ' <span style="color:var(--primary);">(' + (item.comboLabel || item.tier) + ')</span>' : '';
-      itemsHtml += '<div class="track-item-row"><span>' + item.name + tierStr + ' <span style="color:var(--text-muted);">×' + item.quantity + '</span></span><span style="font-weight:600;">' + formatPrice(itemTotal) + '</span></div>';
+      itemsHtml += '<div class="track-item-row"><span>' + item.name + tierStr + ' <span style="color:var(--text-muted);">\u00D7' + item.quantity + '</span></span><span style="font-weight:600;">' + formatPrice(itemTotal) + '</span></div>';
     });
 
-    // Timeline HTML
     var timelineHtml = '';
     STATUS_STEPS.forEach(function (step, idx) {
       var isCompleted = idx <= currentIdx;
@@ -793,46 +761,54 @@
   }
 
   /* --------------------------------------------
-     SCROLL ANIMATIONS (replaces Framer Motion)
+     SCROLL ANIMATIONS
   -------------------------------------------- */
   function initScrollAnimations() {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible');
       });
     }, { threshold: 0.1, rootMargin: '-40px' });
-
     var elements = document.querySelectorAll('.animate-on-scroll');
     for (var i = 0; i < elements.length; i++) observer.observe(elements[i]);
   }
 
   /* --------------------------------------------
-     HASH ROUTING
+     NAVBAR SCROLL SPY
   -------------------------------------------- */
-  function handleHash() {
- var hash = window.location.hash.replace('#', '');
-    if (hash && ['home', 'menu', 'track', 'contact'].indexOf(hash) !== -1) {
-      setView(hash);
-    }
+  function initScrollSpy() {
+    var sections = ['home', 'menu', 'track', 'contact'];
+    var navLinks = document.querySelectorAll('.navbar-links a');
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          navLinks.forEach(function (link) {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '-80px 0px -50% 0px' });
+    sections.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
   }
 
   /* --------------------------------------------
      INIT
   -------------------------------------------- */
   function init() {
-    // Render initial state
-    renderView();
     renderCartBadge();
-    renderTierTabs();
     renderCategoryTabs();
     renderMenu();
     initScrollAnimations();
-    handleHash();
+    initScrollSpy();
 
-    // Event listeners
-    window.addEventListener('hashchange', handleHash);
+    // Handle hash on load
+    if (window.location.hash) {
+      var target = document.querySelector(window.location.hash);
+      if (target) setTimeout(function () { target.scrollIntoView({ behavior: 'smooth' }); }, 100);
+    }
 
     // Close overlays on escape
     document.addEventListener('keydown', function (e) {
@@ -855,14 +831,13 @@
   }
 
   // Expose functions to global scope for onclick handlers
-  window.setView = setView;
   window.openMobileNav = openMobileNav;
   window.closeMobileNav = closeMobileNav;
   window.openCart = openCart;
   window.closeCart = closeCart;
   window.updateQuantity = updateQuantity;
   window.removeFromCart = removeFromCart;
-  window.setTier = setTier;
+  window.setProductTier = setProductTier;
   window.setCategory = setCategory;
   window.handleAddToCart = handleAddToCart;
   window.addAddonDirect = addAddonDirect;
