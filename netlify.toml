@@ -2,7 +2,9 @@
   publish = "public"
 
 [[redirects]]
-  "/admin" = "/admin/index.html" 200
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200
 
 [[headers]]
   for = "/*"
@@ -12,6 +14,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
+[[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
