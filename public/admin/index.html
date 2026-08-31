@@ -3,92 +3,365 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — GIZDODOSPECIALS</title>
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin - GIZDODOSPECIALS</title>
-  <link rel="icon" href="/icons/icon-192.png">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
 
-  <!-- LOGIN -->
-  <div class="login-wrap" id="login-screen">
-    <div class="login-card">
-      <h1>GIZDODOSPECIALS</h1>
-      <p class="sub">Admin Dashboard</p>
-      <input type="password" id="login-password" placeholder="Enter admin password" aria-label="Admin password" autocomplete="current-password">
-      <p class="login-error" id="login-error"></p>
-      <button class="login-btn" onclick="handleLogin()">Sign In</button>
+<!-- ============================================
+     LOGIN SCREEN
+     ============================================ -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="brand">GIZDODOSPECIALS</div>
+    <h1>Admin Dashboard</h1>
+    <p class="subtitle">Enter your password to continue</p>
+    <div class="login-error" id="login-error">Incorrect password. Please try again.</div>
+    <div class="form-group">
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" class="form-input" placeholder="Enter admin password" autocomplete="current-password">
     </div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px;padding:12px;" onclick="Admin.login()" id="login-btn">Sign In</button>
+  </div>
+</div>
+
+<!-- ============================================
+     DASHBOARD APP
+     ============================================ -->
+<div class="admin-app" id="admin-app">
+
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <button class="menu-btn" onclick="Admin.toggleSidebar()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    </button>
+    <span class="title" id="mobile-page-title">Dashboard</span>
   </div>
 
-  <!-- DASHBOARD -->
-  <div class="dashboard">
-    <header class="dash-header">
-      <h1>GIZDODOSPECIALS Admin</h1>
-      <button class="dash-logout" onclick="logout()">Sign Out</button>
-    </header>
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="Admin.toggleSidebar()"></div>
 
-    <nav class="dash-tabs" aria-label="Dashboard sections">
-      <button class="dash-tab active" data-tab="orders" onclick="switchTab('orders')">Orders</button>
-      <button class="dash-tab" data-tab="images" onclick="switchTab('images')">Menu Images</button>
-      <button class="dash-tab" data-tab="settings" onclick="switchTab('settings')">Settings</button>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="/images/logo.jpg" alt="" onerror="this.style.display='none'">
+      <span>GIZDODOSPECIALS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-label">Main</div>
+      <a class="sidebar-link active" data-page="dashboard" onclick="Admin.navigate('dashboard')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="sidebar-link" data-page="orders" onclick="Admin.navigate('orders')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Orders
+      </a>
+      <div class="sidebar-nav-label">Manage</div>
+      <a class="sidebar-link" data-page="products" onclick="Admin.navigate('products')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+        Products
+      </a>
+      <a class="sidebar-link" data-page="drinks" onclick="Admin.navigate('drinks')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l4 10H4L8 2z"/><path d="M12 12v6a4 4 0 0 1-8 0"/></svg>
+        Drinks
+      </a>
+      <div class="sidebar-nav-label">System</div>
+      <a class="sidebar-link" data-page="settings" onclick="Admin.navigate('settings')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
     </nav>
+    <div class="sidebar-footer">
+      <a class="sidebar-link" onclick="Admin.logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </div>
+  </aside>
 
-    <div class="dash-content">
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="content-area">
 
-      <!-- Orders Panel -->
-      <div class="dash-panel active" id="panel-orders">
-        <div class="orders-table-wrap">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th>Order #</th>
-                <th>Customer</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Status / Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="orders-body">
-              <tr><td colspan="6" class="empty-state">Loading...</td></tr>
-            </tbody>
-          </table>
+      <!-- DASHBOARD PAGE -->
+      <div class="page" id="page-dashboard">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+        </div>
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="stat-total-orders">-</div></div>
+          <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="stat-revenue">-</div></div>
+          <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" id="stat-pending">-</div></div>
+          <div class="stat-card"><div class="stat-label">Active Products</div><div class="stat-value" id="stat-products">-</div></div>
+        </div>
+        <div class="data-card">
+          <div class="data-card-header">
+            <h3>Recent Orders</h3>
+            <button class="btn btn-outline btn-sm" onclick="Admin.navigate('orders')">View All</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody id="recent-orders-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Images Panel -->
-      <div class="dash-panel" id="panel-images">
-        <h2 style="font-size:18px;font-weight:700;margin-bottom:20px;">Product Images</h2>
-        <p style="font-size:14px;color:var(--text-muted);margin-bottom:24px;">Upload images for each product and tier. Images are stored in Supabase Storage.</p>
-        <div class="upload-grid" id="upload-grid"></div>
+      <!-- ORDERS PAGE -->
+      <div class="page" id="page-orders" style="display:none;">
+        <div class="page-header">
+          <h2>Orders</h2>
+          <button class="btn btn-outline btn-sm" onclick="Admin.loadOrders()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="data-card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Order</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="orders-body"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <!-- Settings Panel -->
-      <div class="dash-panel" id="panel-settings">
+      <!-- PRODUCTS PAGE -->
+      <div class="page" id="page-products" style="display:none;">
+        <div class="page-header">
+          <h2>Products</h2>
+          <button class="btn btn-primary btn-sm" onclick="Admin.openProductModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Product
+          </button>
+        </div>
+        <div id="products-container"></div>
+      </div>
+
+      <!-- DRINKS PAGE -->
+      <div class="page" id="page-drinks" style="display:none;">
+        <div class="page-header">
+          <h2>Drinks</h2>
+          <button class="btn btn-primary btn-sm" onclick="Admin.openDrinkModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Drink
+          </button>
+        </div>
+        <div id="drinks-container"></div>
+      </div>
+
+      <!-- SETTINGS PAGE -->
+      <div class="page" id="page-settings" style="display:none;">
+        <div class="page-header">
+          <h2>Settings</h2>
+        </div>
         <div class="settings-card">
-          <h3>Change Admin Password</h3>
-          <label for="new-password">New Password</label>
-          <input type="password" id="new-password" placeholder="Enter new password">
-          <button class="btn-primary" onclick="changePassword()">Generate Hash</button>
-          <label for="new-hash-output" style="margin-top:16px;">Password Hash (set as ADMIN_PASSWORD_HASH in Netlify)</label>
-          <input type="text" id="new-hash-output" readonly placeholder="Hash will appear here" style="font-family:monospace;font-size:12px;">
+          <h3>Change Password</h3>
+          <p>Update your admin dashboard password. The new password takes effect immediately.</p>
+          <div class="form-group">
+            <label for="settings-current-pw">Current Password</label>
+            <input type="password" id="settings-current-pw" class="form-input" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label for="settings-new-pw">New Password</label>
+            <input type="password" id="settings-new-pw" class="form-input" placeholder="Enter new password">
+          </div>
+          <div class="form-group">
+            <label for="settings-confirm-pw">Confirm New Password</label>
+            <input type="password" id="settings-confirm-pw" class="form-input" placeholder="Confirm new password">
+          </div>
+          <button class="btn btn-primary" onclick="Admin.changePassword()" style="margin-top:8px;">Update Password</button>
         </div>
       </div>
 
     </div>
   </div>
+</div>
 
-  <script>
-    // Env vars injected at build time by build.js
-    // Placeholders are replaced with Netlify env var values.
-    // To change: update env vars in Netlify Dashboard → Environment, then redeploy.
-    window.ENV = {
-      SUPABASE_URL: '__VITE_SUPABASE_URL__',
-      SUPABASE_ANON_KEY: '__VITE_SUPABASE_ANON_KEY__',
-      ADMIN_PASSWORD_HASH: '__VITE_ADMIN_PASSWORD_HASH__'
-    };
-  </script>
-  <script src="admin.js"></script>
+<!-- ============================================
+     PRODUCT MODAL
+     ============================================ -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="product-modal-title">Add Product</h3>
+      <button class="modal-close" onclick="Admin.closeProductModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pm-edit-id">
+      <div class="form-group">
+        <label>Product ID <span style="color:var(--red);font-weight:400;">(unique, no spaces, e.g. gizdodo)</span></label>
+        <input type="text" id="pm-product-id" class="form-input" placeholder="e.g. gizdodo">
+      </div>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="pm-name" class="form-input" placeholder="e.g. Gizdodo">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="pm-description" class="form-input form-textarea" placeholder="Describe the product..."></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Regular Price (&#x20A6;)</label>
+          <input type="number" id="pm-regular-price" class="form-input" placeholder="9000" min="0">
+        </div>
+        <div class="form-group">
+          <label>Maxi Price (&#x20A6;)</label>
+          <input type="number" id="pm-maxi-price" class="form-input" placeholder="15000" min="0">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Combo Price (&#x20A6;) <span style="color:var(--text-muted);font-weight:400;">(leave empty = no combo)</span></label>
+          <input type="number" id="pm-combo-price" class="form-input" placeholder="17000" min="0">
+        </div>
+        <div class="form-group">
+          <label>Combo Label</label>
+          <input type="text" id="pm-combo-label" class="form-input" placeholder="e.g. Gizdodo with Extra Spaghetti">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Sort Order</label>
+          <input type="number" id="pm-sort-order" class="form-input" placeholder="1" min="0">
+        </div>
+        <div class="form-group">
+          <label>Accepts Extras</label>
+          <select id="pm-accepts-extras" class="form-input form-select">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:8px;margin-bottom:4px;font-weight:600;font-size:13px;">Product Images</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Upload images or leave blank to keep current. Images are stored in Supabase Storage.</p>
+      <div class="image-row">
+        <div class="form-group">
+          <div class="label-row"><label>Regular</label></div>
+          <div class="image-upload-area" style="padding:12px;">
+            <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-regular')">
+            <div class="upload-text"><strong>Upload</strong></div>
+          </div>
+          <input type="hidden" id="pm-img-regular-current">
+          <img class="img-preview-sm" id="pm-preview-regular">
+        </div>
+        <div class="form-group">
+          <div class="label-row"><label>Maxi</label></div>
+          <div class="image-upload-area" style="padding:12px;">
+            <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-maxi')">
+            <div class="upload-text"><strong>Upload</strong></div>
+          </div>
+          <input type="hidden" id="pm-img-maxi-current">
+          <img class="img-preview-sm" id="pm-preview-maxi">
+        </div>
+        <div class="form-group">
+          <div class="label-row"><label>Combo</label></div>
+          <div class="image-upload-area" style="padding:12px;">
+            <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-combo')">
+            <div class="upload-text"><strong>Upload</strong></div>
+          </div>
+          <input type="hidden" id="pm-img-combo-current">
+          <img class="img-preview-sm" id="pm-preview-combo">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Admin.closeProductModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Admin.saveProduct()" id="pm-save-btn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     DRINK MODAL
+     ============================================ -->
+<div class="modal-overlay" id="drink-modal">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header">
+      <h3 id="drink-modal-title">Add Drink</h3>
+      <button class="modal-close" onclick="Admin.closeDrinkModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="dm-edit-id">
+      <div class="form-group">
+        <label>Drink ID <span style="color:var(--red);font-weight:400;">(unique, no spaces)</span></label>
+        <input type="text" id="dm-product-id" class="form-input" placeholder="e.g. chapman">
+      </div>
+      <div class="form-group">
+        <label>Drink Name</label>
+        <input type="text" id="dm-name" class="form-input" placeholder="e.g. Chapman">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Price (&#x20A6;)</label>
+          <input type="number" id="dm-price" class="form-input" placeholder="3000" min="0">
+        </div>
+        <div class="form-group">
+          <label>Sort Order</label>
+          <input type="number" id="dm-sort-order" class="form-input" placeholder="7" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Image</label>
+        <div class="image-upload-area">
+          <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'dm-preview')">
+          <div class="upload-text"><strong>Click to upload</strong> or drag image</div>
+        </div>
+        <input type="hidden" id="dm-img-current">
+        <img class="image-upload-preview" id="dm-preview">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Admin.closeDrinkModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Admin.saveDrink()" id="dm-save-btn">Save Drink</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     ORDER DETAIL MODAL
+     ============================================ -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>Order Details</h3>
+      <button class="modal-close" onclick="Admin.closeOrderModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="order-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Admin.closeOrderModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     CONFIRM DIALOG
+     ============================================ -->
+<div class="confirm-overlay" id="confirm-dialog">
+  <div class="confirm-box">
+    <h4 id="confirm-title">Are you sure?</h4>
+    <p id="confirm-message">This action cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-outline btn-sm" onclick="Admin.closeConfirm()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirm-action-btn" onclick="Admin.confirmAction()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Admin Script -->
+<script src="/js/admin.js"></script>
 </body>
 </html>
