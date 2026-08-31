@@ -608,16 +608,16 @@
     msg += '%0A*Total: ' + formatPrice(total) + '*%0A';
     msg += '%0APayment made to ' + CONFIG.BANK_NAME + ' ' + CONFIG.BANK_ACCOUNT + ' (' + CONFIG.BANK_ACC_NAME + ')';
 
-    // Save to Supabase if configured
-    if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
-      saveOrderToSupabase({ name: name, phone: phone, email: email, deliveryType: deliveryType, address: address, area: area, notes: notes, total: total });
-    }
-
-    // Generate order number
+    // Generate order number FIRST (needed for Supabase + WhatsApp + customer)
     var now = new Date();
     var dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
     var rand = Math.floor(Math.random() * 9000) + 1000;
     var orderNumber = 'GZ-' + dateStr + '-' + rand;
+
+    // Save to Supabase if configured
+    if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
+      saveOrderToSupabase({ orderNumber: orderNumber, name: name, phone: phone, email: email, deliveryType: deliveryType, address: address, area: area, notes: notes, total: total });
+    }
 
     // Open WhatsApp
     window.open('https://wa.me/' + CONFIG.WHATSAPP_PHONE.replace(/[^0-9]/g, '') + '?text=' + msg, '_blank');
@@ -650,6 +650,7 @@
           'Prefer': 'return=minimal',
         },
         body: JSON.stringify({
+          order_number: order.orderNumber,
           customer_name: order.name, customer_phone: order.phone, customer_email: order.email,
           delivery_type: order.deliveryType, delivery_address: order.address, delivery_area: order.area,
           order_notes: order.notes, total: order.total, status: 'payment_pending',
