@@ -22,6 +22,7 @@ const PROCESS_FILES = [
   'admin/index.html',
   'js/app.js',
   'js/track.js',
+  'js/admin.js',
 ];
 
 const COPY_EXTS = new Set([
