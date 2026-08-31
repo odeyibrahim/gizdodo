@@ -37,7 +37,7 @@
   };
 
   /* --------------------------------------------
-     PRODUCT DATA
+     PRODUCT DATA (hardcoded fallback)
   -------------------------------------------- */
   var PRODUCTS = [
     { id: 'gizdodo', name: 'Gizdodo', description: 'Our signature dish \u2014 perfectly fried plantain (dodo) paired with saut\u00e9ed gizzard in a rich, spicy sauce. A Lagos favourite.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 15000, combo: 17000, comboLabel: 'Gizdodo with Extra Spaghetti', images: { regular: '/images/gizdodo-regular.jpg', maxi: '/images/gizdodo-maxi.jpg', combo: '/images/gizdodo-combo.jpg' } },
@@ -48,6 +48,12 @@
     { id: 'chickenfeet', name: 'Chicken Feet Mix', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 13000, combo: null, comboLabel: null, images: { regular: '/images/chickenfeet-regular.jpg', maxi: '/images/chickenfeet-maxi.jpg', combo: '' } },
   ];
 
+  var DRINKS = [
+    { id: 'pineapple', name: 'Pineapple Juice', price: 3000, image: '/images/pineapple-juice.jpg' },
+    { id: 'pineapple-ginger', name: 'Pineapple + Ginger Juice', price: 3000, image: '/images/pineapple-juice.jpg' },
+    { id: 'chapman', name: 'Chapman', price: 3000, image: '/images/chapman.jpg' },
+  ];
+
   var EXTRAS = [
     { id: 'pasta', name: 'Pasta', price: 2000 },
     { id: 'spaghetti', name: 'Spaghetti', price: 2000 },
@@ -55,12 +61,6 @@
     { id: 'rice', name: 'Rice', price: 2000 },
     { id: 'cheese', name: 'Cheese', price: 3000 },
     { id: 'toppings', name: 'Special Topping Mix', price: 3000 },
-  ];
-
-  var DRINKS = [
-    { id: 'pineapple', name: 'Pineapple Juice', price: 3000, image: '/images/pineapple-juice.jpg' },
-    { id: 'pineapple-ginger', name: 'Pineapple + Ginger Juice', price: 3000, image: '/images/pineapple-juice.jpg' },
-    { id: 'chapman', name: 'Chapman', price: 3000, image: '/images/chapman.jpg' },
   ];
 
   /* --------------------------------------------
@@ -689,12 +689,74 @@
   }
 
   /* --------------------------------------------
+     SUPABASE PRODUCT SYNC
+     Fetches products from Supabase; falls back to hardcoded.
+  -------------------------------------------- */
+  function isSupabaseConfigured() {
+    return CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY &&
+           CONFIG.SUPABASE_URL.indexOf('__VITE_') !== 0;
+  }
+
+  function syncProductsWithSupabase() {
+    if (!isSupabaseConfigured()) { renderMenu(); return; }
+    fetch(CONFIG.SUPABASE_URL + '/rest/v1/products?is_active=eq.true&order=sort_order.asc', {
+      headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY },
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      if (!rows || rows.length === 0) { renderMenu(); return; }
+      // Map Supabase rows to app format
+      var mains = rows.filter(function (r) { return r.category === 'mains'; });
+      var drinks = rows.filter(function (r) { return r.category === 'drinks'; });
+      if (mains.length > 0) {
+        PRODUCTS = mains.map(function (r) {
+          return {
+            id: r.product_id,
+            name: r.name,
+            description: r.description || '',
+            category: 'mains',
+            acceptsExtras: !!r.accepts_extras,
+            regular: r.regular_price || 0,
+            maxi: r.maxi_price || 0,
+            combo: r.combo_price || null,
+            comboLabel: r.combo_label || null,
+            images: {
+              regular: r.image_regular || '',
+              maxi: r.image_maxi || '',
+              combo: r.image_combo || '',
+            },
+          };
+        });
+      }
+      if (drinks.length > 0) {
+        DRINKS = drinks.map(function (r) {
+          return {
+            id: r.product_id,
+            name: r.name,
+            price: r.regular_price || 0,
+            image: r.image_single || '',
+          };
+        });
+      }
+      // Reset tiers for any new products
+      PRODUCTS.forEach(function (p) {
+        if (state.productTiers[p.id] === undefined) state.productTiers[p.id] = 'regular';
+      });
+      renderMenu();
+    })
+    .catch(function () {
+      // Fallback to hardcoded products
+      renderMenu();
+    });
+  }
+
+  /* --------------------------------------------
      INIT
   -------------------------------------------- */
   function init() {
     renderCartBadge();
     renderCategoryTabs();
-    renderMenu();
+    syncProductsWithSupabase();
     initScrollAnimations();
     initBackToTop();
 
