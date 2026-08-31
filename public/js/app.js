@@ -114,6 +114,15 @@
     return tier === 'regular' ? 'Regular' : tier === 'maxi' ? 'Maxi' : 'Special Combo';
   }
 
+  function getComboBadge(comboLabel, productName) {
+    if (!comboLabel) return '';
+    var idx = comboLabel.toLowerCase().indexOf('with ');
+    if (idx > 0) {
+      return comboLabel.substring(idx);
+    }
+    return comboLabel;
+  }
+
   /* --------------------------------------------
      TOAST
   -------------------------------------------- */
@@ -235,7 +244,7 @@
       var unitTotal = item.price + extrasTotal;
       var lineTotal = unitTotal * item.quantity;
       var tierBadge = item.tier !== 'regular' && item.tier !== 'drink'
-        ? '<span class="cart-item-badge">' + (item.comboLabel || getTierLabel(item.tier)) + '</span>' : '';
+        ? '<span class="cart-item-badge">' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel, item.name) : getTierLabel(item.tier)) + '</span>' : '';
       var extrasText = item.extras.length > 0 ? '<p class="cart-item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
       var imgHtml = item.image
         ? '<img src="' + item.image + '" alt="' + item.name + '">'
@@ -404,13 +413,18 @@
       var hasCombo = !!p.combo;
       var showExtras = (tier === 'maxi' && p.acceptsExtras);
 
-      // Tier buttons — horizontal, colored, skip combo for products without it
+      // Combo badge — shown next to product name when Special Combo is selected
+      var comboBadge = (tier === 'combo' && p.comboLabel)
+        ? '<span class="combo-badge">' + getComboBadge(p.comboLabel, p.name) + '</span>'
+        : '';
+
+      // Tier buttons — compact inline chips, bg only when selected
       var radiosHtml = '<div class="product-tier-radios" role="radiogroup" aria-label="' + p.name + ' size">';
       var tiers = ['regular', 'maxi'];
       if (hasCombo) tiers.push('combo');
       tiers.forEach(function (t) {
         var isActive = (t === tier);
-        var label = t === 'combo' ? 'Combo' : t.charAt(0).toUpperCase() + t.slice(1);
+        var label = t === 'combo' ? 'Special Combo' : t.charAt(0).toUpperCase() + t.slice(1);
         var tPrice = getPriceForTier(p, t);
         var cls = 'ptier-radio ptier-' + t + (isActive ? ' active' : '');
         radiosHtml += '<button class="' + cls + '" role="radio" aria-checked="' + isActive + '"' +
@@ -420,11 +434,6 @@
         '</button>';
       });
       radiosHtml += '</div>';
-
-      // Combo info
-      var comboInfo = (tier === 'combo' && p.comboLabel)
-        ? '<p class="combo-label">' + p.comboLabel + '</p>'
-        : '';
 
       // Extras indicator — always visible for products with extras
       var extrasIndicator = '';
@@ -452,11 +461,10 @@
       mainsHtml += '<div class="product-card ' + tierClass + '" data-product-id="' + p.id + '">' +
         '<div class="product-card-image">' + imgHtml + '</div>' +
         '<div class="product-card-body">' +
-          '<h4>' + p.name + '</h4>' +
+          '<h4>' + p.name + comboBadge + '</h4>' +
           '<p class="desc">' + p.description + '</p>' +
           extrasIndicator +
           radiosHtml +
-          comboInfo +
           '<button class="product-add-btn"' + btnDisabled + btnAction + '>' + btnLabel + '</button>' +
         '</div>' +
       '</div>';
@@ -558,7 +566,7 @@
       var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
       var unitTotal = item.price + extrasTotal;
       var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
-        ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.comboLabel || getTierLabel(item.tier)) + ')</span>' : '';
+        ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel, item.name) : getTierLabel(item.tier)) + ')</span>' : '';
       var extrasStr = item.extras.length > 0 ? '<p class="item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
       summaryHtml += '<div class="order-summary-item">' +
         '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + extrasStr + '</div>' +
@@ -601,7 +609,7 @@
     msg += '%0A*Order:*%0A';
     state.cart.forEach(function (item) {
       var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
-        ? ' (' + (item.comboLabel || getTierLabel(item.tier)) + ')' : '';
+        ? ' (' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel, item.name) : getTierLabel(item.tier)) + ')' : '';
       var extrasStr = item.extras.length > 0 ? ' + ' + item.extras.map(function (e) { return e.name; }).join(', ') : '';
       msg += '\u2022 ' + item.name + tierStr + extrasStr + ' \u00D7' + item.quantity + ' = ' + formatPrice((item.price + item.extras.reduce(function (s, e) { return s + e.price; }, 0)) * item.quantity) + '%0A';
     });
