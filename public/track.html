@@ -7,14 +7,13 @@
   <title>Track Order - GIZDODOSPECIALS</title>
   <meta name="description" content="Track your GIZDODOSPECIALS order status in real time.">
   <link rel="canonical" href="https://gizdodospecials.com.ng/track">
-  <meta name="theme-color" content="#F0C33C">
+  <meta name="theme-color" content="#EBB213">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <!-- NAVBAR -->
   <header class="navbar" role="banner">
     <a href="index.html" class="navbar-brand" aria-label="GIZDODOSPECIALS - Go to home">
       <img src="/images/logo.jpg" alt="GIZDODOSPECIALS logo" style="height:36px;width:auto;border-radius:6px;">
@@ -32,8 +31,6 @@
       </button>
     </div>
   </header>
-
-  <!-- Mobile Nav -->
   <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="closeMobileNav()"></div>
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
     <div class="mobile-nav-header">
@@ -49,28 +46,20 @@
     </ul>
     <div class="mobile-nav-footer">Fresh in Lekki, Lagos</div>
   </nav>
-
-  <!-- MAIN CONTENT -->
   <main id="main-content">
     <section class="track-section">
       <div class="track-container">
-        <div class="track-heading">
-          <h2>Track Your Order</h2>
-        </div>
+        <div class="track-heading"><h2>Track Your Order</h2></div>
         <p class="track-subtitle">Enter your order number to see the latest status</p>
-
         <div class="track-search">
           <input type="text" id="track-input" placeholder="e.g. GZ-20260831-1234" aria-label="Order number" onkeydown="if(event.key==='Enter')trackOrder()">
           <button class="btn btn-primary" onclick="trackOrder()">Track</button>
         </div>
-
         <div id="track-error" class="track-error" style="display:none;"></div>
         <div id="track-result"></div>
       </div>
     </section>
   </main>
-
-  <!-- FOOTER -->
   <footer class="footer" role="contentinfo">
     <div class="footer-grid">
       <div class="footer-brand">
@@ -98,16 +87,10 @@
     </div>
     <div class="footer-bottom">&copy; 2026 GIZDODOSPECIALS. All rights reserved.</div>
   </footer>
-
-  <!-- Back to top button -->
   <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
   </button>
-
-  <!-- Toast Container -->
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
-
-  <!-- Track Script -->
   <script src="/js/track.js"></script>
 </body>
 </html>
