@@ -1,12 +1,2 @@
 node_modules/
-.env
-.DS_Store
-Thumbs.db
-*.log
-download/
-skills/
-tool-results/
-scripts/
-*.zip
-worklog.md
-.zscripts/
+dist/
