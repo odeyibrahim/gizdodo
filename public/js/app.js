@@ -1,6 +1,6 @@
 /* ============================================
    GIZDODOSPECIALS — Customer App Logic (Home + Menu)
-   Per-product tier radios · Addon Picker Sheet · Cart · Checkout
+   Per-product tier radios · Extras Picker Sheet · Cart · Checkout
    ============================================ */
 (function () {
   'use strict';
@@ -72,10 +72,10 @@
     mobileNavOpen: false,
     cartOpen: false,
     checkoutOpen: false,
-    addonPickerOpen: false,
+    extrasPickerOpen: false,
     productTiers: {},
     pendingCartItem: null,
-    selectedAddonIds: {},
+    selectedExtraIds: {},
   };
 
   PRODUCTS.forEach(function (p) {
@@ -237,8 +237,11 @@
       var tierBadge = item.tier !== 'regular' && item.tier !== 'drink'
         ? '<span class="cart-item-badge">' + (item.comboLabel || getTierLabel(item.tier)) + '</span>' : '';
       var extrasText = item.extras.length > 0 ? '<p class="cart-item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
+      var imgHtml = item.image
+        ? '<img src="' + item.image + '" alt="' + item.name + '">'
+        : '<span class="placeholder-icon" style="font-size:11px;">' + ICONS.utensils + '</span>';
       html += '<div class="cart-item">' +
-        '<div class="cart-item-img"><span class="placeholder-icon" style="font-size:11px;">' + ICONS.utensils + '</span></div>' +
+        '<div class="cart-item-img">' + imgHtml + '</div>' +
         '<div class="cart-item-body">' +
           '<div class="cart-item-name-row"><span class="cart-item-name">' + item.name + '</span>' + tierBadge + '</div>' +
           extrasText +
@@ -271,9 +274,9 @@
   }
 
   /* --------------------------------------------
-     ADDON PICKER SHEET
+     EXTRAS PICKER SHEET
   -------------------------------------------- */
-  function openAddonPicker(productId) {
+  function openExtrasPicker(productId) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
     var tier = state.productTiers[productId] || 'regular';
@@ -286,75 +289,76 @@
       tier: tier,
       comboLabel: tier === 'combo' ? product.comboLabel : null,
       extras: [],
+      image: product.images[tier] || '',
     };
-    state.selectedAddonIds = {};
-    state.addonPickerOpen = true;
+    state.selectedExtraIds = {};
+    state.extrasPickerOpen = true;
 
-    renderAddonPicker();
-    document.getElementById('addon-picker').classList.add('open');
-    document.getElementById('addon-picker-overlay').classList.add('open');
+    renderExtrasPicker();
+    document.getElementById('extras-picker').classList.add('open');
+    document.getElementById('extras-picker-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeAddonPicker() {
-    state.addonPickerOpen = false;
+  function closeExtrasPicker() {
+    state.extrasPickerOpen = false;
     state.pendingCartItem = null;
-    state.selectedAddonIds = {};
-    document.getElementById('addon-picker').classList.remove('open');
-    document.getElementById('addon-picker-overlay').classList.remove('open');
+    state.selectedExtraIds = {};
+    document.getElementById('extras-picker').classList.remove('open');
+    document.getElementById('extras-picker-overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
 
-  function toggleAddon(extraId) {
-    if (state.selectedAddonIds[extraId]) {
-      delete state.selectedAddonIds[extraId];
+  function toggleExtra(extraId) {
+    if (state.selectedExtraIds[extraId]) {
+      delete state.selectedExtraIds[extraId];
     } else {
-      state.selectedAddonIds[extraId] = true;
+      state.selectedExtraIds[extraId] = true;
     }
-    renderAddonPicker();
+    renderExtrasPicker();
   }
 
-  function renderAddonPicker() {
+  function renderExtrasPicker() {
     var pending = state.pendingCartItem;
     if (!pending) return;
 
     // Pending info
-    document.getElementById('addon-picker-pending').innerHTML =
+    document.getElementById('extras-picker-pending').innerHTML =
       '<p class="name">' + pending.name + '</p>' +
       '<p class="tier">Maxi \u2014 ' + formatPrice(pending.price) + '</p>';
 
     // Extras list
-    var bodyHtml = '<p class="addon-section-title">Choose your extras</p>';
+    var bodyHtml = '<p class="extras-section-title">Choose your extras</p>';
     EXTRAS.forEach(function (e) {
-      var sel = !!state.selectedAddonIds[e.id];
-      bodyHtml += '<div class="addon-item' + (sel ? ' selected' : '') + '" onclick="toggleAddon(\'' + e.id + '\')">' +
-        '<div class="addon-item-check">' + (sel ? ICONS.check : '') + '</div>' +
-        '<span class="addon-item-name">' + e.name + '</span>' +
-        '<span class="addon-item-price">' + formatPrice(e.price) + '</span>' +
+      var sel = !!state.selectedExtraIds[e.id];
+      bodyHtml += '<div class="extras-item' + (sel ? ' selected' : '') + '" onclick="toggleExtra(\'' + e.id + '\')">' +
+        '<div class="extras-item-check">' + (sel ? ICONS.check : '') + '</div>' +
+        '<span class="extras-item-name">' + e.name + '</span>' +
+        '<span class="extras-item-price">' + formatPrice(e.price) + '</span>' +
       '</div>';
     });
-    document.getElementById('addon-picker-body').innerHTML = bodyHtml;
+    document.getElementById('extras-picker-body').innerHTML = bodyHtml;
 
     // Footer total
     var extrasTotal = 0;
-    for (var eid in state.selectedAddonIds) {
+    for (var eid in state.selectedExtraIds) {
       var ex = EXTRAS.find(function (e) { return e.id === eid; });
       if (ex) extrasTotal += ex.price;
     }
     var grandTotal = pending.price + extrasTotal;
     var extrasStr = extrasTotal > 0 ? ' + Extras: ' + formatPrice(extrasTotal) : '';
 
-    document.getElementById('addon-picker-footer').innerHTML =
-      '<div class="addon-total-row"><span class="label">Base: ' + formatPrice(pending.price) + extrasStr + '</span><span class="value">' + formatPrice(grandTotal) + '</span></div>' +
-      '<button class="btn btn-primary" style="width:100%;padding:16px;" onclick="confirmAddonSelection()">Add to Cart \u2014 ' + formatPrice(grandTotal) + '</button>';
+    document.getElementById('extras-picker-footer').innerHTML =
+      '<div class="extras-total-row"><span class="label">Base: ' + formatPrice(pending.price) + extrasStr + '</span><span class="value">' + formatPrice(grandTotal) + '</span></div>' +
+      '<button class="btn btn-primary" style="width:100%;padding:16px;" onclick="confirmExtrasSelection()">Add to Cart \u2014 ' + formatPrice(grandTotal) + '</button>';
   }
 
-  function confirmAddonSelection() {
+  function confirmExtrasSelection() {
     var pending = state.pendingCartItem;
     if (!pending) return;
 
     var selectedExtras = [];
-    for (var eid in state.selectedAddonIds) {
+    for (var eid in state.selectedExtraIds) {
       var ex = EXTRAS.find(function (e) { return e.id === eid; });
       if (ex) selectedExtras.push({ id: ex.id, name: ex.name, price: ex.price });
     }
@@ -364,7 +368,7 @@
 
     var extrasStr = selectedExtras.length > 0 ? ' with ' + selectedExtras.map(function (e) { return e.name; }).join(', ') : '';
     toast(pending.name + extrasStr + ' added to cart');
-    closeAddonPicker();
+    closeExtrasPicker();
   }
 
   /* --------------------------------------------
@@ -400,20 +404,20 @@
       var hasCombo = !!p.combo;
       var showExtras = (tier === 'maxi' && p.acceptsExtras);
 
-      // Tier radio buttons
+      // Tier buttons — horizontal, colored, skip combo for products without it
       var radiosHtml = '<div class="product-tier-radios" role="radiogroup" aria-label="' + p.name + ' size">';
-      ['regular', 'maxi', 'combo'].forEach(function (t) {
-        var isDisabled = (t === 'combo' && !hasCombo);
+      var tiers = ['regular', 'maxi'];
+      if (hasCombo) tiers.push('combo');
+      tiers.forEach(function (t) {
         var isActive = (t === tier);
-        var label = t === 'combo' ? 'Special Combo' : t.charAt(0).toUpperCase() + t.slice(1);
+        var label = t === 'combo' ? 'Combo' : t.charAt(0).toUpperCase() + t.slice(1);
         var tPrice = getPriceForTier(p, t);
-        var cls = 'ptier-radio' + (isActive ? ' active' : '') + (isDisabled ? ' disabled' : '');
+        var cls = 'ptier-radio ptier-' + t + (isActive ? ' active' : '');
         radiosHtml += '<button class="' + cls + '" role="radio" aria-checked="' + isActive + '"' +
-          (isDisabled ? ' disabled aria-disabled="true"' : '') +
           ' onclick="setProductTier(\'' + p.id + '\',\'' + t + '\')">' +
-          '<span>' + label + '</span>' +
+          '<span class="ptier-label">' + label + '</span>' +
           '<span class="ptier-price">' + formatPrice(tPrice) + '</span>' +
-          '</button>';
+        '</button>';
       });
       radiosHtml += '</div>';
 
@@ -426,7 +430,7 @@
       var extrasIndicator = '';
       if (p.acceptsExtras) {
         if (tier === 'maxi') {
-          extrasIndicator = '<span class="extras-indicator extras-indicator-red">Add-ons available \u2014 tap below to customise</span>';
+          extrasIndicator = '<span class="extras-indicator extras-indicator-red">Extras available \u2014 add to order to customise</span>';
         } else {
           extrasIndicator = '<span class="extras-indicator">Extras available on Maxi Bowls</span>';
         }
@@ -435,14 +439,12 @@
       var tierClass = 'tier-' + tier;
 
       // Button
-      var isUnavailable = (tier === 'combo' && !p.combo);
-      var btnLabel = isUnavailable ? 'Unavailable' : 'Add to Order \u00B7 ' + formatPrice(price);
-      var btnDisabled = isUnavailable ? ' disabled' : '';
+      var isUnavailable = false;
+      var btnLabel = 'Add to Order \u00B7 ' + formatPrice(price);
+      var btnDisabled = '';
       var btnAction;
-      if (isUnavailable) {
-        btnAction = '';
-      } else if (showExtras) {
-        btnAction = ' onclick="openAddonPicker(\'' + p.id + '\')"';
+      if (showExtras) {
+        btnAction = ' onclick="openExtrasPicker(\'' + p.id + '\')"';
       } else {
         btnAction = ' onclick="handleAddToCartDirect(\'' + p.id + '\')"';
       }
@@ -501,6 +503,7 @@
       tier: tier,
       comboLabel: tier === 'combo' ? product.comboLabel : null,
       extras: [],
+      image: product.images[tier] || '',
     });
     toast(product.name + ' added to cart');
   }
@@ -515,6 +518,7 @@
       tier: 'drink',
       comboLabel: null,
       extras: [],
+      image: drink.image || '',
     });
     toast(drink.name + ' added');
   }
@@ -701,7 +705,7 @@
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        if (state.addonPickerOpen) closeAddonPicker();
+        if (state.extrasPickerOpen) closeExtrasPicker();
         else if (state.checkoutOpen) closeCheckout();
         else if (state.cartOpen) closeCart();
         else if (state.mobileNavOpen) closeMobileNav();
@@ -721,12 +725,12 @@
   window.updateQuantity = updateQuantity;
   window.removeFromCart = removeFromCart;
   window.setProductTier = setProductTier;
-  window.toggleAddon = toggleAddon;
+  window.toggleExtra = toggleExtra;
   window.setCategory = setCategory;
   window.handleAddToCartDirect = handleAddToCartDirect;
-  window.openAddonPicker = openAddonPicker;
-  window.closeAddonPicker = closeAddonPicker;
-  window.confirmAddonSelection = confirmAddonSelection;
+  window.openExtrasPicker = openExtrasPicker;
+  window.closeExtrasPicker = closeExtrasPicker;
+  window.confirmExtrasSelection = confirmExtrasSelection;
   window.addDrink = addDrink;
   window.openCheckout = openCheckout;
   window.closeCheckout = closeCheckout;
