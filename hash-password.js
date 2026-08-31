@@ -1,20 +1,6 @@
-// Run this in your site folder:
-//   node hash-password.js "your-password-here"
-//
-// It will print the SHA-256 hash. Copy it to Netlify env var ADMIN_PASSWORD_HASH
-
+// Run: node hash-password.js "your-password"
 const crypto = require('crypto');
-const password = process.argv[2];
-
-if (!password) {
-  console.log('Usage: node hash-password.js "your-password"');
-  console.log('Example: node hash-password.js "gizdodo2024"');
-  process.exit(1);
-}
-
-const hash = crypto.createHash('sha256').update(password).digest('hex');
-console.log('Password: ' + password);
-console.log('Hash:     ' + hash);
-console.log('');
-console.log('Set this in Netlify > Site > Environment variables:');
-console.log('  ADMIN_PASSWORD_HASH=' + hash);
+const pw = process.argv[2] || 'admin123';
+console.log('Password:', pw);
+console.log('SHA-256 Hash:', crypto.createHash('sha256').update(pw).digest('hex'));
+console.log('\nSet this as VITE_ADMIN_PASSWORD_HASH in Netlify Environment Variables.');
