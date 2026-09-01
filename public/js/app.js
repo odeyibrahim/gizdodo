@@ -608,6 +608,9 @@
     var rand = Math.floor(Math.random() * 9000) + 1000;
     var orderNumber = 'GZ-' + dateStr + '-' + rand;
 
+    // Snapshot cart before clearing
+    var orderCart = JSON.parse(JSON.stringify(state.cart));
+
     // Save to Supabase
     if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
       saveOrderToSupabase({ orderNumber: orderNumber, name: name, phone: phone, email: email, deliveryType: deliveryType, address: address, area: area, notes: notes, total: total });
@@ -620,6 +623,9 @@
     document.getElementById('success-order-number').textContent = orderNumber;
     document.getElementById('success-modal').classList.add('open');
 
+    // Send order details via WhatsApp (opens in new tab)
+    sendOrderWhatsApp(orderNumber, name, phone, email, deliveryType, address, area, notes, total, orderCart);
+
     // Reset form
     document.getElementById('checkout-name').value = '';
     document.getElementById('checkout-phone').value = '';
@@ -629,6 +635,48 @@
     document.getElementById('checkout-notes').value = '';
     document.getElementById('checkout-payment-confirmed').checked = false;
     setDeliveryType('delivery');
+  }
+
+  function sendOrderWhatsApp(orderNumber, name, phone, email, deliveryType, address, area, notes, total, cart) {
+    var waPhone = CONFIG.WHATSAPP_PHONE.replace(/[^0-9]/g, '');
+    if (!waPhone || waPhone.indexOf('__VITE_') === 0) return;
+
+    // Build item lines
+    var itemLines = [];
+    cart.forEach(function (item) {
+      var extrasTxt = '';
+      if (item.extras && item.extras.length > 0) {
+        extrasTxt = ' +' + item.extras.map(function (e) { return e.name; }).join(', ');
+      }
+      var unitPrice = item.price;
+      if (item.extras) {
+        item.extras.forEach(function (e) { unitPrice += (e.price || 0) * (e.qty || 1); });
+      }
+      itemLines.push(item.name + extrasTxt + ' x' + item.quantity + ' = ' + formatPrice(unitPrice * item.quantity));
+    });
+
+    var msg = '';
+    msg += '*New Order: ' + orderNumber + '*\n';
+    msg += '--------------------------------\n';
+    msg += '*Customer:* ' + name + '\n';
+    msg += '*Phone:* ' + phone + '\n';
+    if (email) msg += '*Email:* ' + email + '\n';
+    msg += '*Type:* ' + (deliveryType === 'delivery' ? 'Delivery' : 'Pickup') + '\n';
+    if (deliveryType === 'delivery') {
+      if (address) msg += '*Address:* ' + address + '\n';
+      if (area) msg += '*Area:* ' + area + '\n';
+    }
+    msg += '--------------------------------\n';
+    msg += '*Items:*\n';
+    msg += itemLines.join('\n') + '\n';
+    msg += '--------------------------------\n';
+    msg += '*Total:* ' + formatPrice(total) + '\n';
+    if (notes) msg += '*Notes:* ' + notes + '\n';
+    msg += '--------------------------------\n';
+    msg += 'Payment confirmed by customer.';
+
+    var url = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
   }
 
   function saveOrderToSupabase(order) {
