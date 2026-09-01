@@ -1,35 +1,77 @@
-/* GIZDODOSPECIALS Service Worker — v2 */
-const CACHE_NAME = 'gizdodo-v2';
-const ASSETS = [
+/* ============================================
+   GIZDODOSPECIALS — Service Worker
+   Caches static assets for PWA / offline support
+   Enables background notification support
+   ============================================ */
+
+var CACHE_NAME = 'gizdodo-v2';
+var STATIC_ASSETS = [
   '/',
-  '/index.html',
-  '/track.html',
-  '/contact.html',
   '/css/styles.css',
   '/js/app.js',
-  '/js/track.js',
+  '/admin/',
+  '/admin/index.html',
+  '/css/admin.css',
+  '/js/admin.js',
   '/manifest.json',
+  '/logo.svg',
+  '/track.html',
+  '/contact.html',
+  '/js/track.js',
 ];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
+// Install: cache static assets
+self.addEventListener('install', function (event) {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))));
+// Activate: clean old caches
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (names) {
+      return Promise.all(
+        names.filter(function (n) { return n !== CACHE_NAME; }).map(function (n) { return caches.delete(n); })
+      );
+    })
+  );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  const url = new URL(e.request.url);
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
-        return res;
+// Fetch: network-first, fallback to cache
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    fetch(event.request)
+      .then(function (response) {
+        // Cache successful GET responses
+        if (event.request.method === 'GET' && response.ok) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, clone); });
+        }
+        return response;
       })
-      .catch(() => caches.match(e.request))
+      .catch(function () {
+        return caches.match(event.request);
+      })
+  );
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then(function (clients) {
+      for (var i = 0; i < clients.length; i++) {
+        if (clients[i].url.indexOf('/admin/') !== -1 && 'focus' in clients[i]) {
+          clients[i].focus();
+          return;
+        }
+      }
+      return self.clients.openWindow('/admin/');
+    })
   );
 });
