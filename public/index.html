@@ -2,7 +2,7 @@
 <html lang="en-NG">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <!-- SEO Meta Tags -->
@@ -392,7 +392,9 @@
     <div class="modal-box">
       <div class="success-icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
       <h3>Order Placed!</h3>
-      <p>Your order <strong id="success-order-number"></strong> has been received. We will confirm your order and start preparing it shortly. Thank you!</p>
+      <p style="margin-bottom:6px;">Your order has been received. We will confirm and start preparing it shortly.</p>
+      <div class="success-order-row"><span class="success-order-label">Tracking Code</span><span class="success-order-code" id="success-order-number"></span><button class="success-copy-btn" onclick="copyText(document.getElementById('success-order-number').textContent, this)" aria-label="Copy tracking code"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+      <p class="success-whatsapp-hint">WhatsApp has been opened with your order details — just tap <strong>Send</strong> to confirm.</p>
       <button class="btn btn-primary" onclick="closeSuccessModal()">Back to Menu</button>
     </div>
   </div>
