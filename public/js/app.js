@@ -1,6 +1,6 @@
 /* ============================================
    GIZDODOSPECIALS — Customer App Logic (Home + Menu)
-   Per-product tier radios · Extras Picker Sheet · Cart · Checkout
+   Standalone tier cards · + Button · Extras Modal · Cart · FAB
    ============================================ */
 (function () {
   'use strict';
@@ -73,14 +73,9 @@
     cartOpen: false,
     checkoutOpen: false,
     extrasPickerOpen: false,
-    productTiers: {},
     pendingCartItem: null,
     selectedExtraIds: {},
   };
-
-  PRODUCTS.forEach(function (p) {
-    state.productTiers[p.id] = 'regular';
-  });
 
   /* --------------------------------------------
      HELPERS
@@ -114,13 +109,19 @@
     return tier === 'regular' ? 'Regular' : tier === 'maxi' ? 'Maxi' : 'Special Combo';
   }
 
-  function getComboBadge(comboLabel, productName) {
+  function getComboBadge(comboLabel) {
     if (!comboLabel) return '';
     var idx = comboLabel.toLowerCase().indexOf('with ');
-    if (idx > 0) {
-      return comboLabel.substring(idx);
-    }
+    if (idx > 0) { return comboLabel.substring(idx); }
     return comboLabel;
+  }
+
+  function getCartQtyForCard(productId, tier) {
+    var qty = 0;
+    state.cart.forEach(function (item) {
+      if (item.productId === productId && item.tier === tier && item.extras.length === 0) qty += item.quantity;
+    });
+    return qty;
   }
 
   /* --------------------------------------------
@@ -139,6 +140,21 @@
       el.style.animation = 'toastOut 0.3s ease forwards';
       setTimeout(function () { el.remove(); }, 300);
     }, 4000);
+  }
+
+  function copyText(text, el) {
+    var target = el || (typeof event !== 'undefined' ? event.currentTarget : null);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function () { showCopied(target); });
+    } else {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showCopied(target);
+    }
+  }
+
+  function showCopied(el) {
+    if (!el) return;
+    el.classList.add('copied');
+    setTimeout(function () { el.classList.remove('copied'); }, 1500);
   }
 
   /* --------------------------------------------
@@ -163,33 +179,26 @@
   function addToCart(item) {
     var key = cartItemKey(item);
     var existing = state.cart.find(function (c) { return cartItemKey(c) === key; });
-    if (existing) {
-      existing.quantity++;
-    } else {
-      state.cart.push(Object.assign({}, item, { quantity: 1 }));
-    }
-    renderCartBadge();
+    if (existing) { existing.quantity++; } else { state.cart.push(Object.assign({}, item, { quantity: 1 })); }
+    renderCartBadge(); renderFAB(); renderMenu();
     if (state.cartOpen) renderCartDrawer();
   }
 
   function removeFromCart(idx) {
-    if (idx >= 0 && idx < state.cart.length) {
-      state.cart.splice(idx, 1);
-    }
-    renderCartBadge();
-    renderCartDrawer();
+    if (idx >= 0 && idx < state.cart.length) { state.cart.splice(idx, 1); }
+    renderCartBadge(); renderFAB(); renderMenu(); renderCartDrawer();
   }
 
   function updateQuantity(idx, qty) {
     if (qty <= 0) { removeFromCart(idx); return; }
     if (state.cart[idx]) state.cart[idx].quantity = qty;
-    renderCartBadge();
-    renderCartDrawer();
+    renderCartBadge(); renderFAB(); renderMenu();
+    if (state.cartOpen) renderCartDrawer();
   }
 
   function clearCart() {
     state.cart = [];
-    renderCartBadge();
+    renderCartBadge(); renderFAB();
   }
 
   function renderCartBadge() {
@@ -201,6 +210,21 @@
       badge.style.display = 'flex';
     } else {
       badge.style.display = 'none';
+    }
+  }
+
+  function renderFAB() {
+    var fab = document.getElementById('cart-fab');
+    if (!fab) return;
+    var count = getCartCount();
+    var total = getCartTotal();
+    if (count > 0) {
+      fab.style.display = 'flex';
+      document.getElementById('fab-count').textContent = count;
+      document.getElementById('fab-text').textContent = count + ' item' + (count !== 1 ? 's' : '');
+      document.getElementById('fab-total').textContent = formatPrice(total);
+    } else {
+      fab.style.display = 'none';
     }
   }
 
@@ -244,7 +268,7 @@
       var unitTotal = item.price + extrasTotal;
       var lineTotal = unitTotal * item.quantity;
       var tierBadge = item.tier !== 'regular' && item.tier !== 'drink'
-        ? '<span class="cart-item-badge">' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel, item.name) : getTierLabel(item.tier)) + '</span>' : '';
+        ? '<span class="cart-item-badge">' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel) : getTierLabel(item.tier)) + '</span>' : '';
       var extrasText = item.extras.length > 0 ? '<p class="cart-item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
       var imgHtml = item.image
         ? '<img src="' + item.image + '" alt="' + item.name + '">'
@@ -272,37 +296,18 @@
   }
 
   /* --------------------------------------------
-     PER-PRODUCT TIER SELECTION
-  -------------------------------------------- */
-  function setProductTier(productId, tier) {
-    var product = PRODUCTS.find(function (p) { return p.id === productId; });
-    if (!product) return;
-    if (tier === 'combo' && !product.combo) return;
-    state.productTiers[productId] = tier;
-    renderMenu();
-  }
-
-  /* --------------------------------------------
      EXTRAS PICKER SHEET
   -------------------------------------------- */
   function openExtrasPicker(productId) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
-    var tier = state.productTiers[productId] || 'regular';
-    var price = getPriceForTier(product, tier);
-
+    var price = product.maxi;
     state.pendingCartItem = {
-      productId: product.id,
-      name: product.name,
-      price: price,
-      tier: tier,
-      comboLabel: tier === 'combo' ? product.comboLabel : null,
-      extras: [],
-      image: product.images[tier] || '',
+      productId: product.id, name: product.name, price: price, tier: 'maxi',
+      comboLabel: null, extras: [], image: product.images.maxi || '',
     };
     state.selectedExtraIds = {};
     state.extrasPickerOpen = true;
-
     renderExtrasPicker();
     document.getElementById('extras-picker').classList.add('open');
     document.getElementById('extras-picker-overlay').classList.add('open');
@@ -337,7 +342,7 @@
       '<p class="tier">Maxi \u2014 ' + formatPrice(pending.price) + '</p>';
 
     // Extras list
-    var bodyHtml = '<p class="extras-section-title">Choose your extras</p>';
+    var bodyHtml = '<p class="extras-section-title">Add to select any option</p>';
     EXTRAS.forEach(function (e) {
       var sel = !!state.selectedExtraIds[e.id];
       bodyHtml += '<div class="extras-item' + (sel ? ' selected' : '') + '" onclick="toggleExtra(\'' + e.id + '\')">' +
@@ -400,89 +405,77 @@
     var mainsContainer = document.getElementById('mains-grid');
     var drinksContainer = document.getElementById('drinks-grid');
 
-    // ---- Mains ----
+    // ---- Mains: each tier as standalone card ----
     var mainsHtml = '';
     PRODUCTS.forEach(function (p) {
-      var tier = state.productTiers[p.id] || 'regular';
-      var price = getPriceForTier(p, tier);
-      var imgUrl = p.images[tier] || '';
-      var imgHtml = imgUrl
-        ? '<img src="' + imgUrl + '" alt="' + p.name + ' - ' + getTierLabel(tier) + '" loading="lazy">'
-        : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
-
-      var hasCombo = !!p.combo;
-      var showExtras = (tier === 'maxi' && p.acceptsExtras);
-
-      // Combo badge — shown next to product name when Special Combo is selected
-      var comboBadge = (tier === 'combo' && p.comboLabel)
-        ? '<span class="combo-badge">' + getComboBadge(p.comboLabel, p.name) + '</span>'
-        : '';
-
-      // Tier buttons — compact inline chips, bg only when selected
-      var radiosHtml = '<div class="product-tier-radios" role="radiogroup" aria-label="' + p.name + ' size">';
-      var tiers = ['regular', 'maxi'];
-      if (hasCombo) tiers.push('combo');
+      var tiers = [
+        { key: 'regular', price: p.regular, image: p.images.regular, hasExtras: false },
+        { key: 'maxi', price: p.maxi, image: p.images.maxi, hasExtras: p.acceptsExtras },
+      ];
+      if (p.combo) {
+        tiers.push({ key: 'combo', price: p.combo, image: p.images.combo, hasExtras: false });
+      }
       tiers.forEach(function (t) {
-        var isActive = (t === tier);
-        var label = t === 'combo' ? 'Special Combo' : t.charAt(0).toUpperCase() + t.slice(1);
-        var tPrice = getPriceForTier(p, t);
-        var cls = 'ptier-radio ptier-' + t + (isActive ? ' active' : '');
-        radiosHtml += '<button class="' + cls + '" role="radio" aria-checked="' + isActive + '"' +
-          ' onclick="setProductTier(\'' + p.id + '\',\'' + t + '\')">' +
-          '<span class="ptier-label">' + label + '</span>' +
-          '<span class="ptier-price">' + formatPrice(tPrice) + '</span>' +
-        '</button>';
-      });
-      radiosHtml += '</div>';
+        var imgUrl = t.image || '';
+        var imgHtml = imgUrl
+          ? '<img src="' + imgUrl + '" alt="' + p.name + ' ' + getTierLabel(t.key) + '" loading="lazy">'
+          : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
 
-      // Extras indicator — always visible for products with extras
-      var extrasIndicator = '';
-      if (p.acceptsExtras) {
-        if (tier === 'maxi') {
-          extrasIndicator = '<span class="extras-indicator extras-indicator-red">Extras available \u2014 add to order to customise</span>';
+        var comboBadge = t.key === 'combo' && p.comboLabel
+          ? ' <span class="combo-badge-inline">' + getComboBadge(p.comboLabel) + '</span>'
+          : '';
+
+        var qty = getCartQtyForCard(p.id, t.key);
+        var countHtml = qty > 0 ? '<span class="card-add-count">' + qty + '</span>' : '';
+
+        var extrasHint = '';
+        if (t.hasExtras) { extrasHint = '<span class="extras-hint">Customisable</span>'; }
+
+        var addAction;
+        if (t.hasExtras) {
+          addAction = 'onclick="openExtrasPicker(\'' + p.id + '\')"';
         } else {
-          extrasIndicator = '<span class="extras-indicator">Extras available on Maxi Bowls</span>';
+          addAction = 'onclick="handleAddToCartDirect(\'' + p.id + '\',\'' + t.key + '\')"';
         }
-      }
 
-      var tierClass = 'tier-' + tier;
-
-      // Button
-      var isUnavailable = false;
-      var btnLabel = 'Add to Order \u00B7 ' + formatPrice(price);
-      var btnDisabled = '';
-      var btnAction;
-      if (showExtras) {
-        btnAction = ' onclick="openExtrasPicker(\'' + p.id + '\')"';
-      } else {
-        btnAction = ' onclick="handleAddToCartDirect(\'' + p.id + '\')"';
-      }
-
-      mainsHtml += '<div class="product-card ' + tierClass + '" data-product-id="' + p.id + '">' +
-        '<div class="product-card-image">' + imgHtml + '</div>' +
-        '<div class="product-card-body">' +
-          '<h4>' + p.name + comboBadge + '</h4>' +
-          '<p class="desc">' + p.description + '</p>' +
-          extrasIndicator +
-          radiosHtml +
-          '<button class="product-add-btn"' + btnDisabled + btnAction + '>' + btnLabel + '</button>' +
-        '</div>' +
-      '</div>';
+        mainsHtml += '<div class="product-card" data-product-id="' + p.id + '" data-tier="' + t.key + '">' +
+          '<div class="product-card-image">' + imgHtml +
+            '<span class="tier-badge tier-badge-' + t.key + '">' + getTierLabel(t.key) + '</span>' +
+          '</div>' +
+          '<div class="product-card-body">' +
+            '<span class="card-name">' + p.name + comboBadge + '</span>' +
+            '<span class="card-desc">' + p.description + '</span>' +
+            extrasHint +
+            '<div class="product-card-footer">' +
+              '<span class="card-price">' + formatPrice(t.price) + '</span>' +
+              '<button class="card-add-btn" ' + addAction + '>' + ICONS.plus + countHtml + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
     });
     mainsContainer.innerHTML = mainsHtml;
 
-    // ---- Drinks (full product cards) ----
+    // ---- Drinks ----
     var drinksHtml = '';
     DRINKS.forEach(function (d) {
       var dImgHtml = d.image
         ? '<img src="' + d.image + '" alt="' + d.name + '" loading="lazy">'
         : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
-      drinksHtml += '<div class="product-card tier-drink" data-product-id="drink-' + d.id + '">' +
-        '<div class="product-card-image">' + dImgHtml + '</div>' +
+      var qty = 0;
+      state.cart.forEach(function (item) { if (item.productId === 'drink-' + d.id) qty += item.quantity; });
+      var countHtml = qty > 0 ? '<span class="card-add-count">' + qty + '</span>' : '';
+      drinksHtml += '<div class="product-card" data-product-id="drink-' + d.id + '">' +
+        '<div class="product-card-image">' + dImgHtml +
+          '<span class="tier-badge tier-badge-drink">Drink</span>' +
+        '</div>' +
         '<div class="product-card-body">' +
-          '<h4>' + d.name + '</h4>' +
-          '<p class="desc">Refreshing drink to complement your meal.</p>' +
-          '<button class="product-add-btn" onclick="addDrink(\'' + d.id + '\')">Add to Order \u00B7 ' + formatPrice(d.price) + '</button>' +
+          '<span class="card-name">' + d.name + '</span>' +
+          '<span class="card-desc">Refreshing drink to complement your meal.</span>' +
+          '<div class="product-card-footer">' +
+            '<span class="card-price">' + formatPrice(d.price) + '</span>' +
+            '<button class="card-add-btn" onclick="addDrink(\'' + d.id + '\')">' + ICONS.plus + countHtml + '</button>' +
+          '</div>' +
         '</div>' +
       '</div>';
     });
@@ -498,12 +491,10 @@
   /* --------------------------------------------
      ADD TO CART (direct, no extras)
   -------------------------------------------- */
-  function handleAddToCartDirect(productId) {
+  function handleAddToCartDirect(productId, tier) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
-    var tier = state.productTiers[productId] || 'regular';
     var price = getPriceForTier(product, tier);
-
     addToCart({
       productId: product.id,
       name: product.name,
@@ -513,7 +504,7 @@
       extras: [],
       image: product.images[tier] || '',
     });
-    toast(product.name + ' added to cart');
+    toast(product.name + ' (' + getTierLabel(tier) + ') added to cart');
   }
 
   function addDrink(drinkId) {
@@ -566,7 +557,7 @@
       var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
       var unitTotal = item.price + extrasTotal;
       var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
-        ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel, item.name) : getTierLabel(item.tier)) + ')</span>' : '';
+        ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.comboLabel || getTierLabel(item.tier)) + ')</span>' : '';
       var extrasStr = item.extras.length > 0 ? '<p class="item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
       summaryHtml += '<div class="order-summary-item">' +
         '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + extrasStr + '</div>' +
@@ -609,14 +600,14 @@
     msg += '%0A*Order:*%0A';
     state.cart.forEach(function (item) {
       var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
-        ? ' (' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel, item.name) : getTierLabel(item.tier)) + ')' : '';
+        ? ' (' + (item.comboLabel || getTierLabel(item.tier)) + ')' : '';
       var extrasStr = item.extras.length > 0 ? ' + ' + item.extras.map(function (e) { return e.name; }).join(', ') : '';
       msg += '\u2022 ' + item.name + tierStr + extrasStr + ' \u00D7' + item.quantity + ' = ' + formatPrice((item.price + item.extras.reduce(function (s, e) { return s + e.price; }, 0)) * item.quantity) + '%0A';
     });
     msg += '%0A*Total: ' + formatPrice(total) + '*%0A';
     msg += '%0APayment made to ' + CONFIG.BANK_NAME + ' ' + CONFIG.BANK_ACCOUNT + ' (' + CONFIG.BANK_ACC_NAME + ')';
 
-    // Generate order number FIRST (needed for Supabase + WhatsApp + customer)
+    // Generate order number FIRST (needed for Supabase + customer)
     var now = new Date();
     var dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
     var rand = Math.floor(Math.random() * 9000) + 1000;
@@ -627,12 +618,11 @@
       saveOrderToSupabase({ orderNumber: orderNumber, name: name, phone: phone, email: email, deliveryType: deliveryType, address: address, area: area, notes: notes, total: total });
     }
 
-    // Open WhatsApp
-    window.open('https://wa.me/' + CONFIG.WHATSAPP_PHONE.replace(/[^0-9]/g, '') + '?text=' + msg, '_blank');
-
     // Clear and show success
     clearCart();
     closeCheckout();
+    renderFAB();
+    renderMenu();
     document.getElementById('success-order-number').textContent = orderNumber;
     document.getElementById('success-modal').classList.add('open');
 
@@ -747,10 +737,6 @@
           };
         });
       }
-      // Reset tiers for any new products
-      PRODUCTS.forEach(function (p) {
-        if (state.productTiers[p.id] === undefined) state.productTiers[p.id] = 'regular';
-      });
       renderMenu();
     })
     .catch(function () {
@@ -764,6 +750,7 @@
   -------------------------------------------- */
   function init() {
     renderCartBadge();
+    renderFAB();
     renderCategoryTabs();
     syncProductsWithSupabase();
     initScrollAnimations();
@@ -795,7 +782,6 @@
   window.closeCart = closeCart;
   window.updateQuantity = updateQuantity;
   window.removeFromCart = removeFromCart;
-  window.setProductTier = setProductTier;
   window.toggleExtra = toggleExtra;
   window.setCategory = setCategory;
   window.handleAddToCartDirect = handleAddToCartDirect;
@@ -808,6 +794,7 @@
   window.setDeliveryType = setDeliveryType;
   window.handlePlaceOrder = handlePlaceOrder;
   window.closeSuccessModal = closeSuccessModal;
+  window.copyText = copyText;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
