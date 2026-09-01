@@ -208,67 +208,30 @@
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
-          <label>Regular Price (&#x20A6;)</label>
+          <label>Price (&#x20A6;) <span style="color:var(--red);">*</span></label>
           <input type="number" id="pm-regular-price" class="form-input" placeholder="9000" min="0">
         </div>
-        <div class="form-group">
-          <label>Maxi Price (&#x20A6;)</label>
-          <input type="number" id="pm-maxi-price" class="form-input" placeholder="15000" min="0">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="form-group">
-          <label>Combo Price (&#x20A6;) <span style="color:var(--text-muted);font-weight:400;">(leave empty = no combo)</span></label>
-          <input type="number" id="pm-combo-price" class="form-input" placeholder="17000" min="0">
-        </div>
-        <div class="form-group">
-          <label>Combo Label</label>
-          <input type="text" id="pm-combo-label" class="form-input" placeholder="e.g. Gizdodo with Extra Spaghetti">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="form-group">
           <label>Sort Order</label>
           <input type="number" id="pm-sort-order" class="form-input" placeholder="1" min="0">
         </div>
-        <div class="form-group">
-          <label>Accepts Extras</label>
-          <select id="pm-accepts-extras" class="form-input form-select">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </div>
       </div>
-      <div style="margin-top:8px;margin-bottom:4px;font-weight:600;font-size:13px;">Product Images</div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Upload images or leave blank to keep current. Images are stored in Supabase Storage.</p>
-      <div class="image-row">
-        <div class="form-group">
-          <div class="label-row"><label>Regular</label></div>
-          <div class="image-upload-area" style="padding:12px;">
-            <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-regular')">
-            <div class="upload-text"><strong>Upload</strong></div>
-          </div>
-          <input type="hidden" id="pm-img-regular-current">
-          <img class="img-preview-sm" id="pm-preview-regular">
+      <div class="form-group">
+        <label>Accepts Extras</label>
+        <select id="pm-accepts-extras" class="form-input form-select">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+      <div style="margin-top:8px;margin-bottom:4px;font-weight:600;font-size:13px;">Product Image</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Upload image or leave blank to keep current. Image is stored in Supabase Storage.</p>
+      <div class="form-group">
+        <div class="image-upload-area">
+          <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-regular')">
+          <div class="upload-text"><strong>Click to upload</strong> or drag image</div>
         </div>
-        <div class="form-group">
-          <div class="label-row"><label>Maxi</label></div>
-          <div class="image-upload-area" style="padding:12px;">
-            <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-maxi')">
-            <div class="upload-text"><strong>Upload</strong></div>
-          </div>
-          <input type="hidden" id="pm-img-maxi-current">
-          <img class="img-preview-sm" id="pm-preview-maxi">
-        </div>
-        <div class="form-group">
-          <div class="label-row"><label>Combo</label></div>
-          <div class="image-upload-area" style="padding:12px;">
-            <input type="file" accept="image/*" onchange="Admin.previewImage(this, 'pm-preview-combo')">
-            <div class="upload-text"><strong>Upload</strong></div>
-          </div>
-          <input type="hidden" id="pm-img-combo-current">
-          <img class="img-preview-sm" id="pm-preview-combo">
-        </div>
+        <input type="hidden" id="pm-img-regular-current">
+        <img class="image-upload-preview" id="pm-preview-regular">
       </div>
     </div>
     <div class="modal-footer">
