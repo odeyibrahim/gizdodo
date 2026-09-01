@@ -18,12 +18,6 @@
     SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
   };
 
-  if (window.ENV) {
-    if (window.ENV.SUPABASE_URL) CONFIG.SUPABASE_URL = window.ENV.SUPABASE_URL;
-    if (window.ENV.SUPABASE_ANON_KEY) CONFIG.SUPABASE_KEY = window.ENV.SUPABASE_ANON_KEY;
-    if (window.ENV.WHATSAPP_PHONE) CONFIG.WHATSAPP_PHONE = window.ENV.WHATSAPP_PHONE;
-  }
-
   /* --------------------------------------------
      SVG ICONS
   -------------------------------------------- */
