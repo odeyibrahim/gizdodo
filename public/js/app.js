@@ -10,19 +10,13 @@
      CONFIG
   -------------------------------------------- */
   var CONFIG = {
-    WHATSAPP_PHONE: '',
+    WHATSAPP_PHONE: '__VITE_WHATSAPP_PHONE__',
     BANK_NAME: 'GTBank',
     BANK_ACCOUNT: '3005029891',
     BANK_ACC_NAME: 'Gizdodo Special Hub',
-    SUPABASE_URL: '',
-    SUPABASE_KEY: '',
+    SUPABASE_URL: '__VITE_SUPABASE_URL__',
+    SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
   };
-
-  if (window.ENV) {
-    if (window.ENV.SUPABASE_URL) CONFIG.SUPABASE_URL = window.ENV.SUPABASE_URL;
-    if (window.ENV.SUPABASE_ANON_KEY) CONFIG.SUPABASE_KEY = window.ENV.SUPABASE_ANON_KEY;
-    if (window.ENV.WHATSAPP_PHONE) CONFIG.WHATSAPP_PHONE = window.ENV.WHATSAPP_PHONE;
-  }
 
   /* --------------------------------------------
      SVG ICONS
