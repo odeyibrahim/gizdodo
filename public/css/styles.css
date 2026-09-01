@@ -279,10 +279,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   padding: 64px 16px 48px;
 }
 .hero h1 {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1.2;
   color: #fff;
+  white-space: nowrap;
 }
 .hero-subtitle {
   margin-top: 16px;
@@ -329,14 +330,14 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 @media (min-width: 640px) {
   .hero { min-height: 480px; }
   .hero-content { padding: 96px 24px 64px; }
-  .hero h1 { font-size: 38px; }
+  .hero h1 { font-size: 32px; }
   .hero-subtitle { font-size: 16px; }
   .hero-actions { flex-direction: row; justify-content: center; }
 }
 @media (min-width: 1024px) {
   .hero { min-height: 540px; }
   .hero-content { padding: 112px 32px 80px; }
-  .hero h1 { font-size: 48px; }
+  .hero h1 { font-size: 44px; }
 }
 
 /* ============================================
