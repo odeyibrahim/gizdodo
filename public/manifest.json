@@ -3,11 +3,25 @@
   "short_name": "GizAdmin",
   "description": "GIZDODOSPECIALS Order Management Dashboard",
   "start_url": "/admin/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#EBB213",
   "orientation": "any",
+  "categories": ["food", "business"],
   "icons": [
+    {
+      "src": "/images/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
     {
       "src": "/logo.svg",
       "sizes": "any",
