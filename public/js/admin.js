@@ -9,9 +9,9 @@ var Admin = (function () {
      CONFIG
   -------------------------------------------- */
   var CONFIG = {
-    ADMIN_PASSWORD_HASH: '__VITE_ADMIN_PASSWORD_HASH__',
-    SUPABASE_URL: '__VITE_SUPABASE_URL__',
-    SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
+    ADMIN_PASSWORD_HASH: '',
+    SUPABASE_URL: '',
+    SUPABASE_KEY: '',
     STORAGE_BUCKET: 'product-images',
   };
 
@@ -365,9 +365,6 @@ var Admin = (function () {
         var extrasTotal = (item.extras || []).reduce(function (s, e) { return s + (e.price || 0); }, 0);
         var unitTotal = (item.price || 0) + extrasTotal;
         var name = escHtml(item.name || 'Item');
-        if (item.tier && item.tier !== 'regular' && item.tier !== 'drink') {
-          name += ' <span style="color:var(--text-muted);">(' + escHtml(item.comboLabel || item.tier) + ')</span>';
-        }
         if (item.extras && item.extras.length > 0) {
           name += ' <span style="color:var(--text-muted);">+ ' + escHtml(item.extras.map(function (e) { return e.name; }).join(', ')) + '</span>';
         }
@@ -461,7 +458,7 @@ var Admin = (function () {
       document.getElementById('pm-description').value = '';
       document.getElementById('pm-regular-price').value = '';
       document.getElementById('pm-sort-order').value = state.products.length + 1;
-      document.getElementById('pm-accepts-extras').value = 'true';
+      document.getElementById('pm-accepts-extras').value = 'false';
       clearImgPreview('pm-preview-regular');
       document.getElementById('pm-img-regular-current').value = '';
     }
