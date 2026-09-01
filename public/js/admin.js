@@ -267,8 +267,14 @@ var Admin = (function () {
     var tbody = document.getElementById('orders-body');
     tbody.innerHTML = '<tr><td colspan="7"><div class="skeleton" style="height:300px;"></div></td></tr>';
     apiGet('orders', '?order=created_at.desc&limit=100').then(function (orders) {
-      state.orders = orders || [];
+      var prevCount = state.orders ? state.orders.length : 0;
+      var newOrders = orders || [];
+      state.orders = newOrders;
       renderOrders();
+      // Play sound if new orders arrived
+      if (newOrders.length > prevCount) {
+        playNotificationSound();
+      }
     });
   }
 
@@ -745,40 +751,110 @@ var Admin = (function () {
   }
 
   /* --------------------------------------------
+     AUDIO: Generate beep WAV data URI
+  -------------------------------------------- */
+  var notificationSoundUrl = null;
+  function generateBeepDataUri() {
+    try {
+      var sampleRate = 44100, duration = 0.4, frequency = 880;
+      var numSamples = Math.floor(sampleRate * duration);
+      var dataLength = numSamples * 2;
+      var buffer = new ArrayBuffer(44 + dataLength);
+      var view = new DataView(buffer);
+      function writeString(offset, str) { for (var i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); }
+      writeString(0, 'RIFF');
+      view.setUint32(4, 36 + dataLength, true);
+      writeString(8, 'WAVE');
+      writeString(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(36, 'data');
+      view.setUint32(40, dataLength, true);
+      for (var i = 0; i < numSamples; i++) {
+        var t = i / sampleRate;
+        var envelope = Math.max(0, 1 - t / duration);
+        var sample = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.7;
+        var intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767)));
+        view.setInt16(44 + i * 2, intSample, true);
+      }
+      return 'data:audio/wav;base64,' + btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
+    } catch (e) {
+      console.error('Failed to generate beep:', e);
+      return null;
+    }
+  }
+  notificationSoundUrl = generateBeepDataUri();
+
+  function playNotificationSound() {
+    if (!notificationSoundUrl) return;
+    try {
+      var audio = new Audio(notificationSoundUrl);
+      audio.volume = 0.7;
+      audio.play().catch(function () {
+        var fallback = document.getElementById('notification-audio');
+        if (fallback) { fallback.src = notificationSoundUrl; fallback.play().catch(function () {}); }
+      });
+    } catch (e) {}
+  }
+
+  /* --------------------------------------------
      SETTINGS - PASSWORD CHANGE
   -------------------------------------------- */
   function changePassword() {
     var currentPw = document.getElementById('settings-current-pw').value;
     var newPw = document.getElementById('settings-new-pw').value;
     var confirmPw = document.getElementById('settings-confirm-pw').value;
+    var msgEl = document.getElementById('settings-pw-msg');
+    var btn = document.getElementById('settings-pw-btn');
 
     if (!currentPw || !newPw || !confirmPw) { toast('All fields are required', 'error'); return; }
     if (newPw !== confirmPw) { toast('New passwords do not match', 'error'); return; }
-    if (newPw.length < 4) { toast('Password must be at least 4 characters', 'error'); return; }
+    if (newPw.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+
+    if (!isConfigured()) { toast('Supabase not configured. Cannot change password.', 'error'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Changing...';
 
     sha256(currentPw).then(function (currentHash) {
-      if (isConfigured()) {
-        // Verify current password against Supabase
-        apiGet('admin_settings', '?key=eq.password_hash').then(function (rows) {
-          if (!rows || rows.length === 0 || rows[0].value !== currentHash) {
-            toast('Current password is incorrect', 'error'); return;
-          }
-          return sha256(newPw);
-        }).then(function (newHash) {
-          if (!newHash) return;
-          return apiPatch('admin_settings',
-            rows[0].id,
-            { value: newHash, updated_at: new Date().toISOString() }
-          );
-        }).then(function () {
-          toast('Password updated successfully');
-          document.getElementById('settings-current-pw').value = '';
-          document.getElementById('settings-new-pw').value = '';
-          document.getElementById('settings-confirm-pw').value = '';
-        }).catch(function (e) { toast('Error: ' + e.message, 'error'); });
-      } else {
-        toast('Supabase not configured. Cannot change password.', 'error');
+      // Check env hash first
+      var localHash = CONFIG.ADMIN_PASSWORD_HASH;
+      if (localHash && currentHash === localHash) {
+        // Current password matches env var, proceed to change
+        return sha256(newPw);
       }
+      // Then check Supabase
+      return apiGet('admin_settings', '?key=eq.password_hash&select=value').then(function (rows) {
+        var dbHash = (rows && rows.length > 0) ? rows[0].value : null;
+        if (currentHash !== dbHash) {
+          throw new Error('Current password is incorrect');
+        }
+        return sha256(newPw);
+      });
+    }).then(function (newHash) {
+      if (!newHash) return;
+      return apiGet('admin_settings', '?key=eq.password_hash&select=id').then(function (rows) {
+        if (rows && rows.length > 0) {
+          return apiPatch('admin_settings', rows[0].id, { value: newHash, updated_at: new Date().toISOString() });
+        } else {
+          return apiPost('admin_settings', { key: 'password_hash', value: newHash });
+        }
+      });
+    }).then(function () {
+      toast('Password changed successfully');
+      document.getElementById('settings-current-pw').value = '';
+      document.getElementById('settings-new-pw').value = '';
+      document.getElementById('settings-confirm-pw').value = '';
+    }).catch(function (e) {
+      toast('Error: ' + (e.message || e), 'error');
+    }).then(function () {
+      btn.disabled = false;
+      btn.textContent = 'Change Password';
     });
   }
 
