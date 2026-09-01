@@ -4,7 +4,7 @@
    Enables background notification support
    ============================================ */
 
-var CACHE_NAME = 'gizdodo-v2';
+var CACHE_NAME = 'gizdodo-v3';
 var STATIC_ASSETS = [
   '/',
   '/css/styles.css',
@@ -19,6 +19,10 @@ var STATIC_ASSETS = [
   '/contact.html',
   '/js/track.js',
 ];
+
+function isHttpScheme(url) {
+  try { return url.indexOf('http') === 0; } catch (e) { return false; }
+}
 
 // Install: cache static assets
 self.addEventListener('install', function (event) {
@@ -44,11 +48,15 @@ self.addEventListener('activate', function (event) {
 
 // Fetch: network-first, fallback to cache
 self.addEventListener('fetch', function (event) {
+  var url = event.request.url;
+  // Only handle http/https requests — ignore chrome-extension, data, etc.
+  if (!isHttpScheme(url)) return;
+
   event.respondWith(
     fetch(event.request)
       .then(function (response) {
-        // Cache successful GET responses
-        if (event.request.method === 'GET' && response.ok) {
+        // Cache successful same-origin GET responses
+        if (event.request.method === 'GET' && response.ok && isHttpScheme(url)) {
           var clone = response.clone();
           caches.open(CACHE_NAME).then(function (cache) { cache.put(event.request, clone); });
         }
