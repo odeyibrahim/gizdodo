@@ -252,11 +252,11 @@ var Admin = (function () {
     orders.slice(0, 5).forEach(function (o) {
       var st = STATUS_MAP[o.status] || STATUS_MAP.payment_pending;
       html += '<tr>' +
-        '<td><strong>' + escHtml(o.order_number) + '</strong></td>' +
-        '<td>' + escHtml(o.customer_name) + '</td>' +
-        '<td><strong>' + formatPrice(o.total) + '</strong></td>' +
-        '<td><span class="badge ' + st.badge + '">' + st.label + '</span></td>' +
-        '<td style="color:var(--text-muted);font-size:12px;">' + formatDate(o.created_at) + '</td>' +
+        '<td data-label="Order"><strong>' + escHtml(o.order_number) + '</strong></td>' +
+        '<td data-label="Customer">' + escHtml(o.customer_name) + '</td>' +
+        '<td data-label="Total"><strong>' + formatPrice(o.total) + '</strong></td>' +
+        '<td data-label="Status"><span class="badge ' + st.badge + '">' + st.label + '</span></td>' +
+        '<td data-label="Date" class="hide-mobile" style="color:var(--text-muted);font-size:12px;">' + formatDate(o.created_at) + '</td>' +
         '</tr>';
     });
     tbody.innerHTML = html;
@@ -283,7 +283,7 @@ var Admin = (function () {
     // Sort bar
     var sortBar = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">' +
       '<div style="font-weight:600;color:var(--text);">Orders (' + (orders ? orders.length : 0) + ')</div>' +
-      '<select id="order-sort-select" onchange="Admin.sortOrders(this.value)" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text);">' +
+      '<select id="order-sort-select" onchange="Admin.sortOrders(this.value)" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-300);background:var(--card-bg);font-size:13px;font-weight:600;color:var(--text);">' +
         '<option value="created_at.desc">Newest First</option>' +
         '<option value="created_at.asc">Oldest First</option>' +
         '<option value="total.desc">Highest Amount</option>' +
@@ -313,13 +313,13 @@ var Admin = (function () {
         statusOptions += '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + sLabel + '</option>';
       });
       html += '<tr>' +
-        '<td><strong>' + escHtml(o.order_number) + '</strong></td>' +
-        '<td>' + escHtml(o.customer_name) + '</td>' +
-        '<td style="color:var(--text-muted);">' + escHtml(o.customer_phone) + '</td>' +
-        '<td><strong>' + formatPrice(o.total) + '</strong></td>' +
-        '<td><select class="status-select" onchange="Admin.updateOrderStatus(' + o.id + ', this.value)">' + statusOptions + '</select></td>' +
-        '<td style="color:var(--text-muted);font-size:12px;">' + formatDate(o.created_at) + '</td>' +
-        '<td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="Admin.viewOrder(' + idx + ')">View</button> <button class="btn btn-danger btn-sm" onclick="Admin.deleteOrder(' + idx + ')">Delete</button></td>' +
+        '<td data-label="Order"><strong>' + escHtml(o.order_number) + '</strong></td>' +
+        '<td data-label="Customer">' + escHtml(o.customer_name) + '</td>' +
+        '<td data-label="Phone" class="hide-mobile" style="color:var(--text-muted);">' + escHtml(o.customer_phone) + '</td>' +
+        '<td data-label="Total"><strong>' + formatPrice(o.total) + '</strong></td>' +
+        '<td data-label="Status"><select class="status-select" onchange="Admin.updateOrderStatus(' + o.id + ', this.value)">' + statusOptions + '</select></td>' +
+        '<td data-label="Date" class="hide-mobile" style="color:var(--text-muted);font-size:12px;">' + formatDate(o.created_at) + '</td>' +
+        '<td data-label="Actions" style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="Admin.viewOrder(' + idx + ')">View</button> <button class="btn btn-danger btn-sm" onclick="Admin.deleteOrder(' + idx + ')">Delete</button></td>' +
         '</tr>';
     });
     tbody.innerHTML = html;
@@ -651,12 +651,12 @@ var Admin = (function () {
         ? '<img src="' + escHtml(d.image_single) + '" style="width:48px;height:48px;object-fit:cover;border-radius:4px;" onerror="this.style.display=\'none\'">'
         : '<span style="color:var(--text-muted);font-size:12px;">No img</span>';
       html += '<tr>' +
-        '<td>' + imgHtml + '</td>' +
-        '<td><strong>' + escHtml(d.name) + '</strong></td>' +
-        '<td><strong>' + formatPrice(d.regular_price) + '</strong></td>' +
-        '<td>' + d.sort_order + '</td>' +
-        '<td><span class="badge ' + (d.is_active ? 'badge-green' : 'badge-gray') + '">' + (d.is_active ? 'Active' : 'Inactive') + '</span></td>' +
-        '<td>' +
+        '<td data-label="Image">' + imgHtml + '</td>' +
+        '<td data-label="Name"><strong>' + escHtml(d.name) + '</strong></td>' +
+        '<td data-label="Price"><strong>' + formatPrice(d.regular_price) + '</strong></td>' +
+        '<td data-label="Sort" class="hide-mobile">' + d.sort_order + '</td>' +
+        '<td data-label="Active"><span class="badge ' + (d.is_active ? 'badge-green' : 'badge-gray') + '">' + (d.is_active ? 'Active' : 'Inactive') + '</span></td>' +
+        '<td data-label="Actions">' +
           '<button class="btn btn-outline btn-sm" onclick="Admin.editDrink(' + idx + ')">Edit</button> ' +
           '<button class="btn btn-danger btn-sm" onclick="Admin.deleteDrink(' + idx + ')">Delete</button>' +
         '</td></tr>';
