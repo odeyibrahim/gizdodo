@@ -269,19 +269,19 @@
     </div>
   </aside>
 
-  <!-- EXTRAS PICKER SHEET -->
-  <div class="extras-picker-overlay" id="extras-picker-overlay" onclick="closeExtrasPicker()"></div>
-  <aside class="extras-picker" id="extras-picker" role="dialog" aria-label="Customise your order">
-    <div class="extras-picker-header">
-      <button class="checkback-btn" onclick="closeExtrasPicker()" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  <!-- EXTRAS MODAL (centered) -->
+  <div class="extras-modal-overlay" id="extras-modal-overlay" onclick="closeExtrasModal()"></div>
+  <div class="extras-modal" id="extras-modal" role="dialog" aria-label="Add extras">
+    <div class="extras-modal-header">
+      <h3>Add Extras</h3>
+      <button onclick="closeExtrasModal()" aria-label="Close" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-full);color:var(--text-muted);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <h3>Customise Your Maxi Order</h3>
     </div>
-    <div class="extras-picker-pending" id="extras-picker-pending"></div>
-    <div class="extras-picker-body" id="extras-picker-body"></div>
-    <div class="extras-picker-footer" id="extras-picker-footer"></div>
-  </aside>
+    <div class="extras-modal-product" id="extras-modal-product"></div>
+    <div class="extras-modal-body" id="extras-modal-body"></div>
+    <div class="extras-modal-footer" id="extras-modal-footer"></div>
+  </div>
 
   <!-- CHECKOUT SHEET -->
   <div class="checkout-overlay" id="checkout-overlay" onclick="closeCheckout()"></div>
