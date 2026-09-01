@@ -160,12 +160,15 @@ var Admin = (function () {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-app').classList.add('logged-in');
     sessionStorage.setItem('admin_auth', '1');
+    unlockAudio();
+    startOrderPolling();
     loadDashboard();
   }
 
   function logout() {
     state.loggedIn = false;
     sessionStorage.removeItem('admin_auth');
+    stopOrderPolling();
     document.getElementById('login-screen').style.display = '';
     document.getElementById('admin-app').classList.remove('logged-in');
     document.getElementById('login-password').value = '';
@@ -270,6 +273,7 @@ var Admin = (function () {
       var prevCount = state.orders ? state.orders.length : 0;
       var newOrders = orders || [];
       state.orders = newOrders;
+      if (newOrders.length > 0) state._lastOrderId = newOrders[0].id;
       renderOrders();
       // Play sound if new orders arrived
       if (newOrders.length > prevCount) {
@@ -281,6 +285,27 @@ var Admin = (function () {
   function renderOrders() {
     var tbody = document.getElementById('orders-body');
     var orders = state.orders;
+
+    // Sort bar
+    var sortBar = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">' +
+      '<div style="font-weight:600;color:var(--text);">Orders (' + (orders ? orders.length : 0) + ')</div>' +
+      '<select id="order-sort-select" onchange="Admin.sortOrders(this.value)" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);font-size:13px;font-weight:600;color:var(--text);">' +
+        '<option value="created_at.desc">Newest First</option>' +
+        '<option value="created_at.asc">Oldest First</option>' +
+        '<option value="total.desc">Highest Amount</option>' +
+        '<option value="total.asc">Lowest Amount</option>' +
+        '<option value="customer_name.asc">Name A-Z</option>' +
+        '<option value="status.asc">Status A-Z</option>' +
+      '</select></div>';
+    var tableEl = tbody.parentElement;
+    var existingBar = document.getElementById('order-sort-bar');
+    if (!existingBar) {
+      var barDiv = document.createElement('div');
+      barDiv.id = 'order-sort-bar';
+      tableEl.parentElement.insertBefore(barDiv, tableEl);
+    }
+    document.getElementById('order-sort-bar').innerHTML = sortBar;
+
     if (!orders || orders.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">No orders found.</td></tr>';
       return;
@@ -395,11 +420,7 @@ var Admin = (function () {
         '<div class="card-body">' +
           '<h4>' + escHtml(p.name) + '</h4>' +
           '<p class="card-desc">' + escHtml(p.description) + '</p>' +
-          '<div class="card-prices">' +
-            '<span class="price-chip price-chip-regular">Regular: ' + formatPrice(p.regular_price) + '</span>' +
-            (p.maxi_price ? '<span class="price-chip price-chip-maxi">Maxi: ' + formatPrice(p.maxi_price) + '</span>' : '') +
-            (p.combo_price ? '<span class="price-chip price-chip-combo">Combo: ' + formatPrice(p.combo_price) + '</span>' : '') +
-          '</div>' +
+          '<div class="card-prices"><span class="price-chip">' + formatPrice(p.regular_price) + '</span></div>' +
           '<div class="card-actions">' +
             '<button class="btn btn-outline btn-sm" onclick="Admin.editProduct(' + idx + ')">Edit</button>' +
             '<button class="btn btn-outline btn-sm" onclick="Admin.toggleProductActive(' + p.id + ',' + !p.is_active + ')">' + (p.is_active ? 'Deactivate' : 'Activate') + '</button>' +
@@ -427,18 +448,11 @@ var Admin = (function () {
       document.getElementById('pm-name').value = p.name;
       document.getElementById('pm-description').value = p.description || '';
       document.getElementById('pm-regular-price').value = p.regular_price || '';
-      document.getElementById('pm-maxi-price').value = p.maxi_price || '';
-      document.getElementById('pm-combo-price').value = p.combo_price || '';
-      document.getElementById('pm-combo-label').value = p.combo_label || '';
       document.getElementById('pm-sort-order').value = p.sort_order || 0;
       document.getElementById('pm-accepts-extras').value = p.accepts_extras ? 'true' : 'false';
-      // Show current images
+      // Show current image
       setImgPreview('pm-preview-regular', p.image_regular);
-      setImgPreview('pm-preview-maxi', p.image_maxi);
-      setImgPreview('pm-preview-combo', p.image_combo);
       document.getElementById('pm-img-regular-current').value = p.image_regular || '';
-      document.getElementById('pm-img-maxi-current').value = p.image_maxi || '';
-      document.getElementById('pm-img-combo-current').value = p.image_combo || '';
     } else {
       document.getElementById('pm-edit-id').value = '';
       document.getElementById('pm-product-id').value = '';
@@ -446,17 +460,10 @@ var Admin = (function () {
       document.getElementById('pm-name').value = '';
       document.getElementById('pm-description').value = '';
       document.getElementById('pm-regular-price').value = '';
-      document.getElementById('pm-maxi-price').value = '';
-      document.getElementById('pm-combo-price').value = '';
-      document.getElementById('pm-combo-label').value = '';
       document.getElementById('pm-sort-order').value = state.products.length + 1;
       document.getElementById('pm-accepts-extras').value = 'true';
       clearImgPreview('pm-preview-regular');
-      clearImgPreview('pm-preview-maxi');
-      clearImgPreview('pm-preview-combo');
       document.getElementById('pm-img-regular-current').value = '';
-      document.getElementById('pm-img-maxi-current').value = '';
-      document.getElementById('pm-img-combo-current').value = '';
     }
     document.getElementById('product-modal').classList.add('open');
   }
@@ -497,10 +504,6 @@ var Admin = (function () {
     var name = document.getElementById('pm-name').value.trim();
     var description = document.getElementById('pm-description').value.trim();
     var regularPrice = parseInt(document.getElementById('pm-regular-price').value) || 0;
-    var maxiPrice = parseInt(document.getElementById('pm-maxi-price').value) || 0;
-    var comboPriceVal = document.getElementById('pm-combo-price').value;
-    var comboPrice = comboPriceVal ? parseInt(comboPriceVal) : null;
-    var comboLabel = document.getElementById('pm-combo-label').value.trim() || null;
     var sortOrder = parseInt(document.getElementById('pm-sort-order').value) || 0;
     var acceptsExtras = document.getElementById('pm-accepts-extras').value === 'true';
 
@@ -511,16 +514,14 @@ var Admin = (function () {
     var data = {
       product_id: productId, name: name, description: description,
       category: 'mains', accepts_extras: acceptsExtras,
-      regular_price: regularPrice, maxi_price: maxiPrice,
-      combo_price: comboPrice, combo_label: comboLabel,
+      regular_price: regularPrice, maxi_price: 0,
+      combo_price: null, combo_label: null,
       sort_order: sortOrder, is_active: true,
     };
 
-    // Handle image uploads
+    // Handle image upload
     uploadProductImages(productId, editId).then(function (urls) {
       if (urls.regular !== undefined) data.image_regular = urls.regular;
-      if (urls.maxi !== undefined) data.image_maxi = urls.maxi;
-      if (urls.combo !== undefined) data.image_combo = urls.combo;
 
       if (editId) {
         delete data.product_id;
@@ -541,31 +542,24 @@ var Admin = (function () {
   }
 
   function uploadProductImages(productId, editId) {
-    var promises = [];
+    var file = state.editFiles['pm-preview-regular'];
+    var currentUrl = document.getElementById('pm-img-regular-current').value;
     var results = {};
 
-    ['regular', 'maxi', 'combo'].forEach(function (tier) {
-      var file = state.editFiles['pm-preview-' + tier];
-      var currentUrl = document.getElementById('pm-img-' + tier + '-current').value;
-
-      if (file) {
-        // Upload new image to Supabase Storage
-        var ext = file.name.split('.').pop();
-        var storagePath = productId + '/' + tier + '-' + Date.now() + '.' + ext;
-        var p = uploadToStorage(storagePath, file).then(function (url) {
-          results[tier] = url;
-        }).catch(function () {
-          // Fallback: keep current
-          results[tier] = currentUrl || '';
-        });
-        promises.push(p);
-      } else if (editId) {
-        // No new file uploaded, keep current
-        results[tier] = currentUrl || '';
-      }
-    });
-
-    return Promise.all(promises).then(function () { return results; });
+    if (file) {
+      var ext = file.name.split('.').pop();
+      var storagePath = productId + '/regular-' + Date.now() + '.' + ext;
+      return uploadToStorage(storagePath, file).then(function (url) {
+        results.regular = url;
+        return results;
+      }).catch(function () {
+        results.regular = currentUrl || '';
+        return results;
+      });
+    } else {
+      if (editId) results.regular = currentUrl || '';
+      return Promise.resolve(results);
+    }
   }
 
   function uploadToStorage(path, file) {
@@ -790,14 +784,30 @@ var Admin = (function () {
   }
   notificationSoundUrl = generateBeepDataUri();
 
+  var _audioUnlocked = false;
+  function unlockAudio() {
+    if (_audioUnlocked) return;
+    _audioUnlocked = true;
+    if (notificationSoundUrl) {
+      var a = new Audio(notificationSoundUrl);
+      a.volume = 0.01;
+      a.play().catch(function () {});
+    }
+  }
+
   function playNotificationSound() {
     if (!notificationSoundUrl) return;
     try {
       var audio = new Audio(notificationSoundUrl);
       audio.volume = 0.7;
       audio.play().catch(function () {
+        // Desktop browsers may block autoplay; try via hidden audio element
         var fallback = document.getElementById('notification-audio');
-        if (fallback) { fallback.src = notificationSoundUrl; fallback.play().catch(function () {}); }
+        if (fallback) {
+          fallback.src = notificationSoundUrl;
+          fallback.volume = 0.7;
+          fallback.play().catch(function () {});
+        }
       });
     } catch (e) {}
   }
@@ -879,6 +889,62 @@ var Admin = (function () {
   }
 
   /* --------------------------------------------
+     ORDER POLLING (background new-order notification)
+  -------------------------------------------- */
+  var orderPollInterval = null;
+  var lastKnownOrderCount = 0;
+
+  function startOrderPolling() {
+    stopOrderPolling();
+    // Initial count
+    if (isConfigured()) {
+      apiGet('orders', '?select=id&order=created_at.desc&limit=1').then(function (rows) {
+        lastKnownOrderCount = (rows && rows.length > 0) ? 1 : 0;
+      });
+    }
+    orderPollInterval = setInterval(function () {
+      if (!isConfigured() || !state.loggedIn) { stopOrderPolling(); return; }
+      apiGet('orders', '?select=id,created_at&order=created_at.desc&limit=1').then(function (rows) {
+        var currentCount = (rows && rows.length > 0) ? 1 : 0;
+        if (lastKnownOrderCount === 0 && currentCount > 0) {
+          lastKnownOrderCount = currentCount;
+          return;
+        }
+        // Check if newest order ID changed
+        if (rows && rows.length > 0 && state._lastOrderId && state._lastOrderId !== rows[0].id) {
+          playNotificationSound();
+        }
+        if (rows && rows.length > 0) state._lastOrderId = rows[0].id;
+        lastKnownOrderCount = currentCount;
+      }).catch(function () {});
+    }, 10000); // Poll every 10 seconds
+  }
+
+  function stopOrderPolling() {
+    if (orderPollInterval) { clearInterval(orderPollInterval); orderPollInterval = null; }
+  }
+
+  /* --------------------------------------------
+     ORDER SORTING
+  -------------------------------------------- */
+  function sortOrders(sortKey) {
+    if (!state.orders || state.orders.length === 0) return;
+    var parts = sortKey.split('.');
+    var field = parts[0];
+    var dir = parts[1] || 'asc';
+    state.orders.sort(function (a, b) {
+      var va = a[field];
+      var vb = b[field];
+      if (va == null) va = '';
+      if (vb == null) vb = '';
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    renderOrders();
+  }
+
+  /* --------------------------------------------
      INIT
   -------------------------------------------- */
   function init() {
@@ -916,6 +982,9 @@ var Admin = (function () {
     showConfirm: showConfirm,
     confirmAction: confirmAction,
     closeConfirm: closeConfirm,
+    sortOrders: sortOrders,
+    startOrderPolling: startOrderPolling,
+    stopOrderPolling: stopOrderPolling,
   };
 
 })();
