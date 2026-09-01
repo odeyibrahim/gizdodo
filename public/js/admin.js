@@ -270,15 +270,9 @@ var Admin = (function () {
     var tbody = document.getElementById('orders-body');
     tbody.innerHTML = '<tr><td colspan="7"><div class="skeleton" style="height:300px;"></div></td></tr>';
     apiGet('orders', '?order=created_at.desc&limit=100').then(function (orders) {
-      var prevCount = state.orders ? state.orders.length : 0;
-      var newOrders = orders || [];
-      state.orders = newOrders;
-      if (newOrders.length > 0) state._lastOrderId = newOrders[0].id;
+      state.orders = orders || [];
+      if (state.orders.length > 0) state._lastOrderId = state.orders[0].id;
       renderOrders();
-      // Play sound if new orders arrived
-      if (newOrders.length > prevCount) {
-        playNotificationSound();
-      }
     });
   }
 
@@ -742,12 +736,71 @@ var Admin = (function () {
   }
 
   /* --------------------------------------------
-     AUDIO: Generate beep WAV data URI
+     NOTIFICATION: Sound + Badge + Counter
   -------------------------------------------- */
-  var notificationSoundUrl = null;
+  var _audioCtx = null;
+  var _audioUnlocked = false;
+  var _newOrderCount = 0;
+  var _knownOrderIds = {};  // track all seen order IDs
+  var _pollRunning = false;
+
+  function getAudioContext() {
+    if (!_audioCtx) {
+      try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    }
+    return _audioCtx;
+  }
+
+  function unlockAudio() {
+    if (_audioUnlocked) return;
+    _audioUnlocked = true;
+    var ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(function () {});
+    }
+  }
+
+  function playNotificationSound() {
+    // Try Web Audio API first (most reliable on mobile)
+    var ctx = getAudioContext();
+    if (ctx) {
+      try {
+        if (ctx.state === 'suspended') ctx.resume();
+        // Play a pleasant two-tone chime
+        var now = ctx.currentTime;
+        [880, 1108.73].forEach(function (freq, i) {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          var start = now + i * 0.18;
+          gain.gain.setValueAtTime(0.5, start);
+          gain.gain.exponentialRampToValueAtTime(0.01, start + 0.35);
+          osc.start(start);
+          osc.stop(start + 0.35);
+        });
+        // Vibrate on supported devices
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        return;
+      } catch (e) {}
+    }
+    // Fallback: WAV data URI
+    try {
+      var wavUrl = generateBeepDataUri();
+      if (wavUrl) {
+        var audio = new Audio(wavUrl);
+        audio.volume = 0.7;
+        audio.play().catch(function () {});
+      }
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    } catch (e) {}
+  }
+
   function generateBeepDataUri() {
     try {
-      var sampleRate = 44100, duration = 0.4, frequency = 880;
+      var sampleRate = 44100, duration = 0.5, frequency = 880;
       var numSamples = Math.floor(sampleRate * duration);
       var dataLength = numSamples * 2;
       var buffer = new ArrayBuffer(44 + dataLength);
@@ -774,39 +827,64 @@ var Admin = (function () {
         view.setInt16(44 + i * 2, intSample, true);
       }
       return 'data:audio/wav;base64,' + btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
-    } catch (e) {
-      console.error('Failed to generate beep:', e);
-      return null;
-    }
-  }
-  notificationSoundUrl = generateBeepDataUri();
-
-  var _audioUnlocked = false;
-  function unlockAudio() {
-    if (_audioUnlocked) return;
-    _audioUnlocked = true;
-    if (notificationSoundUrl) {
-      var a = new Audio(notificationSoundUrl);
-      a.volume = 0.01;
-      a.play().catch(function () {});
-    }
+    } catch (e) { return null; }
   }
 
-  function playNotificationSound() {
-    if (!notificationSoundUrl) return;
-    try {
-      var audio = new Audio(notificationSoundUrl);
-      audio.volume = 0.7;
-      audio.play().catch(function () {
-        // Desktop browsers may block autoplay; try via hidden audio element
-        var fallback = document.getElementById('notification-audio');
-        if (fallback) {
-          fallback.src = notificationSoundUrl;
-          fallback.volume = 0.7;
-          fallback.play().catch(function () {});
+  function updateNotifBadge(count) {
+    _newOrderCount = count;
+    // 1. PWA home screen badge
+    if (navigator.setAppBadge) {
+      if (count > 0) navigator.setAppBadge(count).catch(function () {});
+      else navigator.clearAppBadge().catch(function () {});
+    }
+    // 2. Document title
+    var baseTitle = 'Admin - GIZDODOSPECIALS';
+    document.title = count > 0 ? '(' + count + ') ' + baseTitle : baseTitle;
+    // 3. Sidebar orders link badge
+    var sidebarOrdersLink = document.querySelector('.sidebar-link[data-page="orders"]');
+    if (sidebarOrdersLink) {
+      var existingBadge = sidebarOrdersLink.querySelector('.order-notif-badge');
+      if (count > 0) {
+        if (!existingBadge) {
+          existingBadge = document.createElement('span');
+          existingBadge.className = 'order-notif-badge';
+          sidebarOrdersLink.style.position = 'relative';
+          sidebarOrdersLink.appendChild(existingBadge);
         }
-      });
-    } catch (e) {}
+        existingBadge.textContent = count > 99 ? '99+' : count;
+      } else if (existingBadge) {
+        existingBadge.remove();
+      }
+    }
+    // 4. Mobile header notification badge
+    var mobileNotif = document.getElementById('mobile-notif-badge');
+    if (mobileNotif) {
+      mobileNotif.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
+    }
+  }
+
+  function injectMobileNotifElements() {
+    // Inject bell icon + badge into mobile header
+    var mobileHeader = document.querySelector('.mobile-header');
+    if (!mobileHeader || document.getElementById('mobile-notif-badge')) return;
+    // Wrap existing children in a header-left div
+    var children = Array.prototype.slice.call(mobileHeader.children);
+    var leftDiv = document.createElement('div');
+    leftDiv.className = 'header-left';
+    children.forEach(function (child) { leftDiv.appendChild(child); });
+    mobileHeader.appendChild(leftDiv);
+    // Create right side with bell
+    var rightDiv = document.createElement('div');
+    rightDiv.className = 'header-right';
+    rightDiv.innerHTML = '<button class="notif-bell" onclick="Admin.navigate(\'orders\')" aria-label="View orders"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="mobile-notif-badge" class="order-notif-badge mobile-notif-badge"></span></button>';
+    mobileHeader.appendChild(rightDiv);
+  }
+
+  function clearNotifOnView() {
+    if (_newOrderCount > 0) {
+      _newOrderCount = 0;
+      updateNotifBadge(0);
+    }
   }
 
   /* --------------------------------------------
@@ -889,36 +967,48 @@ var Admin = (function () {
      ORDER POLLING (background new-order notification)
   -------------------------------------------- */
   var orderPollInterval = null;
-  var lastKnownOrderCount = 0;
 
   function startOrderPolling() {
     stopOrderPolling();
-    // Initial count
-    if (isConfigured()) {
-      apiGet('orders', '?select=id&order=created_at.desc&limit=1').then(function (rows) {
-        lastKnownOrderCount = (rows && rows.length > 0) ? 1 : 0;
-      });
-    }
+    injectMobileNotifElements();
+    if (!isConfigured()) return;
+
+    // Seed known order IDs (don't count existing orders as "new")
+    apiGet('orders', '?select=id&order=created_at.desc&limit=50').then(function (rows) {
+      _knownOrderIds = {};
+      (rows || []).forEach(function (r) { _knownOrderIds[r.id] = true; });
+      updateNotifBadge(0);
+    });
+
+    // Poll every 15 seconds for new orders
     orderPollInterval = setInterval(function () {
       if (!isConfigured() || !state.loggedIn) { stopOrderPolling(); return; }
-      apiGet('orders', '?select=id,created_at&order=created_at.desc&limit=1').then(function (rows) {
-        var currentCount = (rows && rows.length > 0) ? 1 : 0;
-        if (lastKnownOrderCount === 0 && currentCount > 0) {
-          lastKnownOrderCount = currentCount;
-          return;
-        }
-        // Check if newest order ID changed
-        if (rows && rows.length > 0 && state._lastOrderId && state._lastOrderId !== rows[0].id) {
+      if (_pollRunning) return; // prevent overlapping requests
+      _pollRunning = true;
+      apiGet('orders', '?select=id,status,created_at&order=created_at.desc&limit=50').then(function (rows) {
+        _pollRunning = false;
+        var newCount = 0;
+        (rows || []).forEach(function (r) {
+          if (!_knownOrderIds[r.id]) {
+            _knownOrderIds[r.id] = true;
+            newCount++;
+          }
+        });
+        if (newCount > 0) {
+          _newOrderCount += newCount;
+          updateNotifBadge(_newOrderCount);
           playNotificationSound();
+          // Auto-refresh if currently viewing orders or dashboard
+          if (state.currentPage === 'orders') loadOrders();
+          else if (state.currentPage === 'dashboard') loadDashboard();
         }
-        if (rows && rows.length > 0) state._lastOrderId = rows[0].id;
-        lastKnownOrderCount = currentCount;
-      }).catch(function () {});
-    }, 10000); // Poll every 10 seconds
+      }).catch(function () { _pollRunning = false; });
+    }, 15000);
   }
 
   function stopOrderPolling() {
     if (orderPollInterval) { clearInterval(orderPollInterval); orderPollInterval = null; }
+    _pollRunning = false;
   }
 
   /* --------------------------------------------
@@ -951,13 +1041,21 @@ var Admin = (function () {
     });
     // Check session
     checkSession();
+    // Re-focus audio on visibility change (mobile wake-up)
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && _audioUnlocked) {
+        var ctx = getAudioContext();
+        if (ctx && ctx.state === 'suspended') ctx.resume().catch(function () {});
+      }
+    });
   }
 
   // Public API
   return {
     login: login,
     logout: logout,
-    navigate: navigate,
+    clearNotifOnView: clearNotifOnView,
+    navigate: function (page) { clearNotifOnView(); navigate(page); },
     toggleSidebar: toggleSidebar,
     loadOrders: loadOrders,
     updateOrderStatus: updateOrderStatus,
