@@ -41,8 +41,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; }
-body { font-family: var(--font); color: var(--text); background: var(--content-bg); line-height: 1.5; }
+html { font-size: 14px; overflow-x: clip; }
+body { font-family: var(--font); color: var(--text); background: var(--content-bg); line-height: 1.5; overflow-x: clip; max-width: 100vw; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 input, textarea, select { font-family: inherit; font-size: inherit; }
@@ -241,10 +241,13 @@ img { max-width: 100%; display: block; }
   margin-left: var(--sidebar-w);
   flex: 1;
   min-height: 100vh;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 .content-area {
   padding: 24px;
   max-width: 1200px;
+  overflow-x: clip;
 }
 .page-header {
   display: flex;
