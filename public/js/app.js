@@ -1,6 +1,7 @@
 /* ============================================
    GIZDODOSPECIALS — Customer App Logic (Home + Menu)
-   Standalone tier cards · + Button · Extras Modal · Cart · FAB
+   Standalone product cards · + Button · Extras Modal · Cart · FAB
+   Cart persists via localStorage across pages
    ============================================ */
 (function () {
   'use strict';
@@ -37,15 +38,25 @@
   };
 
   /* --------------------------------------------
-     PRODUCT DATA (hardcoded fallback)
+     PRODUCT DATA (hardcoded fallback — standalone cards)
   -------------------------------------------- */
   var PRODUCTS = [
-    { id: 'gizdodo', name: 'Gizdodo', description: 'Our signature dish \u2014 perfectly fried plantain (dodo) paired with saut\u00e9ed gizzard in a rich, spicy sauce. A Lagos favourite.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 15000, combo: 17000, comboLabel: 'Gizdodo with Extra Spaghetti', images: { regular: '/images/gizdodo-regular.jpg', maxi: '/images/gizdodo-maxi.jpg', combo: '/images/gizdodo-combo.jpg' } },
-    { id: 'chickendodo', name: 'Chickendodo', description: 'Crispy fried plantain served with succulent, well-seasoned chicken in our special sauce.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 15000, combo: 18000, comboLabel: 'Chickendodo with Special Toppings', images: { regular: '/images/chickendodo-regular.jpg', maxi: '/images/chickendodo-maxi.jpg', combo: '/images/chickendodo-combo.jpg' } },
-    { id: 'turkeydodo', name: 'Turkeydodo', description: 'Juicy smoked turkey paired with golden fried plantain and our signature savoury sauce.', category: 'mains', acceptsExtras: true, regular: 10000, maxi: 17000, combo: 20000, comboLabel: 'Turkeydodo with Extra Cheese', images: { regular: '/images/turkeydodo-regular.jpg', maxi: '/images/turkeydodo-maxi.jpg', combo: '/images/turkeydodo-combo.jpg' } },
-    { id: 'beefdodo', name: 'Beefdodo', description: 'Tender, flavourful beef served with crispy fried plantain in a rich pepper sauce.', category: 'mains', acceptsExtras: true, regular: 8000, maxi: 13000, combo: 15000, comboLabel: 'Beefdodo with Extra Noodles', images: { regular: '/images/beefdodo-regular.jpg', maxi: '/images/beefdodo-maxi.jpg', combo: '/images/beefdodo-combo.jpg' } },
-    { id: 'snaildodo', name: 'Snaildodo', description: 'Perfectly cooked snails in a fiery, aromatic sauce alongside golden plantain. A delicacy!', category: 'mains', acceptsExtras: true, regular: 10000, maxi: 20000, combo: null, comboLabel: null, images: { regular: '/images/snaildodo-regular.jpg', maxi: '/images/snaildodo-maxi.jpg', combo: '' } },
-    { id: 'chickenfeet', name: 'Chicken Feet Mix', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain.', category: 'mains', acceptsExtras: true, regular: 9000, maxi: 13000, combo: null, comboLabel: null, images: { regular: '/images/chickenfeet-regular.jpg', maxi: '/images/chickenfeet-maxi.jpg', combo: '' } },
+    { id: 'gizdodo-regular', name: 'Gizdodo', description: 'Our signature dish \u2014 perfectly fried plantain (dodo) paired with saut\u00e9ed gizzard in a rich, spicy sauce. A Lagos favourite.', category: 'mains', acceptsExtras: false, price: 9000, image: '/images/gizdodo-regular.jpg' },
+    { id: 'gizdodo-maxi', name: 'Gizdodo Maxi', description: 'Our signature dish \u2014 perfectly fried plantain (dodo) paired with saut\u00e9ed gizzard in a rich, spicy sauce. A Lagos favourite. Bigger portion!', category: 'mains', acceptsExtras: true, price: 15000, image: '/images/gizdodo-maxi.jpg' },
+    { id: 'gizdodo-combo', name: 'Gizdodo Special Combo', description: 'Our signature Gizdodo paired with extra spaghetti for a complete satisfying meal.', category: 'mains', acceptsExtras: false, price: 17000, image: '/images/gizdodo-combo.jpg' },
+    { id: 'chickendodo-regular', name: 'Chickendodo', description: 'Crispy fried plantain served with succulent, well-seasoned chicken in our special sauce.', category: 'mains', acceptsExtras: false, price: 9000, image: '/images/chickendodo-regular.jpg' },
+    { id: 'chickendodo-maxi', name: 'Chickendodo Maxi', description: 'Crispy fried plantain served with succulent, well-seasoned chicken in our special sauce. Bigger portion!', category: 'mains', acceptsExtras: true, price: 15000, image: '/images/chickendodo-maxi.jpg' },
+    { id: 'chickendodo-combo', name: 'Chickendodo Special Combo', description: 'Our Chickendodo paired with special toppings for an extra flavourful experience.', category: 'mains', acceptsExtras: false, price: 18000, image: '/images/chickendodo-combo.jpg' },
+    { id: 'turkeydodo-regular', name: 'Turkeydodo', description: 'Juicy smoked turkey paired with golden fried plantain and our signature savoury sauce.', category: 'mains', acceptsExtras: false, price: 10000, image: '/images/turkeydodo-regular.jpg' },
+    { id: 'turkeydodo-maxi', name: 'Turkeydodo Maxi', description: 'Juicy smoked turkey paired with golden fried plantain and our signature savoury sauce. Bigger portion!', category: 'mains', acceptsExtras: true, price: 17000, image: '/images/turkeydodo-maxi.jpg' },
+    { id: 'turkeydodo-combo', name: 'Turkeydodo Special Combo', description: 'Our Turkeydodo paired with extra cheese for a rich, indulgent meal.', category: 'mains', acceptsExtras: false, price: 20000, image: '/images/turkeydodo-combo.jpg' },
+    { id: 'beefdodo-regular', name: 'Beefdodo', description: 'Tender, flavourful beef served with crispy fried plantain in a rich pepper sauce.', category: 'mains', acceptsExtras: false, price: 8000, image: '/images/beefdodo-regular.jpg' },
+    { id: 'beefdodo-maxi', name: 'Beefdodo Maxi', description: 'Tender, flavourful beef served with crispy fried plantain in a rich pepper sauce. Bigger portion!', category: 'mains', acceptsExtras: true, price: 13000, image: '/images/beefdodo-maxi.jpg' },
+    { id: 'beefdodo-combo', name: 'Beefdodo Special Combo', description: 'Our Beefdodo paired with extra noodles for a complete satisfying meal.', category: 'mains', acceptsExtras: false, price: 15000, image: '/images/beefdodo-combo.jpg' },
+    { id: 'snaildodo-regular', name: 'Snaildodo', description: 'Perfectly cooked snails in a fiery, aromatic sauce alongside golden plantain. A delicacy!', category: 'mains', acceptsExtras: false, price: 10000, image: '/images/snaildodo-regular.jpg' },
+    { id: 'snaildodo-maxi', name: 'Snaildodo Maxi', description: 'Perfectly cooked snails in a fiery, aromatic sauce alongside golden plantain. A delicacy! Bigger portion!', category: 'mains', acceptsExtras: true, price: 20000, image: '/images/snaildodo-maxi.jpg' },
+    { id: 'chickenfeet-regular', name: 'Chicken Feet Mix', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain.', category: 'mains', acceptsExtras: false, price: 9000, image: '/images/chickenfeet-regular.jpg' },
+    { id: 'chickenfeet-maxi', name: 'Chicken Feet Mix Maxi', description: 'Spicy, saucy chicken feet mixed with peppers and onions, served with fried plantain. Bigger portion!', category: 'mains', acceptsExtras: true, price: 13000, image: '/images/chickenfeet-maxi.jpg' },
   ];
 
   var DRINKS = [
@@ -72,10 +83,29 @@
     mobileNavOpen: false,
     cartOpen: false,
     checkoutOpen: false,
-    extrasPickerOpen: false,
+    extrasModalOpen: false,
     pendingCartItem: null,
-    selectedExtraIds: {},
+    selectedExtras: {},  // { extraId: quantity }
   };
+
+  /* --------------------------------------------
+     LOCALSTORAGE CART PERSISTENCE
+  -------------------------------------------- */
+  var CART_KEY = 'gizdodo_cart';
+
+  function saveCart() {
+    try { localStorage.setItem(CART_KEY, JSON.stringify(state.cart)); } catch (e) {}
+  }
+
+  function loadCart() {
+    try {
+      var stored = localStorage.getItem(CART_KEY);
+      if (stored) {
+        state.cart = JSON.parse(stored);
+        if (!Array.isArray(state.cart)) state.cart = [];
+      }
+    } catch (e) { state.cart = []; }
+  }
 
   /* --------------------------------------------
      HELPERS
@@ -86,7 +116,7 @@
 
   function getCartTotal() {
     return state.cart.reduce(function (sum, item) {
-      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
+      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price * e.qty; }, 0);
       return sum + (item.price + extrasTotal) * item.quantity;
     }, 0);
   }
@@ -96,30 +126,14 @@
   }
 
   function cartItemKey(item) {
-    return item.productId + '-' + item.tier + '-' + item.extras.map(function (e) { return e.id; }).sort().join(',');
+    var extrasKey = item.extras.map(function (e) { return e.id + ':' + e.qty; }).sort().join(',');
+    return item.productId + '|' + extrasKey;
   }
 
-  function getPriceForTier(product, tier) {
-    if (tier === 'maxi') return product.maxi;
-    if (tier === 'combo') return product.combo || product.maxi;
-    return product.regular;
-  }
-
-  function getTierLabel(tier) {
-    return tier === 'regular' ? 'Regular' : tier === 'maxi' ? 'Maxi' : 'Special Combo';
-  }
-
-  function getComboBadge(comboLabel) {
-    if (!comboLabel) return '';
-    var idx = comboLabel.toLowerCase().indexOf('with ');
-    if (idx > 0) { return comboLabel.substring(idx); }
-    return comboLabel;
-  }
-
-  function getCartQtyForCard(productId, tier) {
+  function getCartQtyForCard(productId) {
     var qty = 0;
     state.cart.forEach(function (item) {
-      if (item.productId === productId && item.tier === tier && item.extras.length === 0) qty += item.quantity;
+      if (item.productId === productId) qty += item.quantity;
     });
     return qty;
   }
@@ -174,30 +188,34 @@
   }
 
   /* --------------------------------------------
-     CART
+     CART (persists to localStorage)
   -------------------------------------------- */
   function addToCart(item) {
     var key = cartItemKey(item);
     var existing = state.cart.find(function (c) { return cartItemKey(c) === key; });
     if (existing) { existing.quantity++; } else { state.cart.push(Object.assign({}, item, { quantity: 1 })); }
+    saveCart();
     renderCartBadge(); renderFAB(); renderMenu();
     if (state.cartOpen) renderCartDrawer();
   }
 
   function removeFromCart(idx) {
     if (idx >= 0 && idx < state.cart.length) { state.cart.splice(idx, 1); }
+    saveCart();
     renderCartBadge(); renderFAB(); renderMenu(); renderCartDrawer();
   }
 
   function updateQuantity(idx, qty) {
     if (qty <= 0) { removeFromCart(idx); return; }
     if (state.cart[idx]) state.cart[idx].quantity = qty;
+    saveCart();
     renderCartBadge(); renderFAB(); renderMenu();
     if (state.cartOpen) renderCartDrawer();
   }
 
   function clearCart() {
     state.cart = [];
+    saveCart();
     renderCartBadge(); renderFAB();
   }
 
@@ -264,19 +282,17 @@
     document.getElementById('cart-footer').style.display = 'flex';
     var html = '';
     state.cart.forEach(function (item, idx) {
-      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
+      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price * (e.qty || 1); }, 0);
       var unitTotal = item.price + extrasTotal;
       var lineTotal = unitTotal * item.quantity;
-      var tierBadge = item.tier !== 'regular' && item.tier !== 'drink'
-        ? '<span class="cart-item-badge">' + (item.tier === 'combo' && item.comboLabel ? getComboBadge(item.comboLabel) : getTierLabel(item.tier)) + '</span>' : '';
-      var extrasText = item.extras.length > 0 ? '<p class="cart-item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
+      var extrasText = item.extras.length > 0 ? '<p class="cart-item-extras">+ ' + item.extras.map(function (e) { return e.name + (e.qty > 1 ? ' x' + e.qty : ''); }).join(', ') + '</p>' : '';
       var imgHtml = item.image
         ? '<img src="' + item.image + '" alt="' + item.name + '">'
         : '<span class="placeholder-icon" style="font-size:11px;">' + ICONS.utensils + '</span>';
       html += '<div class="cart-item">' +
         '<div class="cart-item-img">' + imgHtml + '</div>' +
         '<div class="cart-item-body">' +
-          '<div class="cart-item-name-row"><span class="cart-item-name">' + item.name + '</span>' + tierBadge + '</div>' +
+          '<div class="cart-item-name-row"><span class="cart-item-name">' + item.name + '</span></div>' +
           extrasText +
           '<p class="cart-item-price">' + formatPrice(unitTotal) + ' each</p>' +
           '<div class="cart-item-actions">' +
@@ -296,73 +312,73 @@
   }
 
   /* --------------------------------------------
-     EXTRAS PICKER SHEET
+     EXTRAS MODAL (centered, ADD buttons)
   -------------------------------------------- */
-  function openExtrasPicker(productId) {
+  function openExtrasModal(productId) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
-    var price = product.maxi;
     state.pendingCartItem = {
-      productId: product.id, name: product.name, price: price, tier: 'maxi',
-      comboLabel: null, extras: [], image: product.images.maxi || '',
+      productId: product.id, name: product.name, price: product.price,
+      extras: [], image: product.image || '',
     };
-    state.selectedExtraIds = {};
-    state.extrasPickerOpen = true;
-    renderExtrasPicker();
-    document.getElementById('extras-picker').classList.add('open');
-    document.getElementById('extras-picker-overlay').classList.add('open');
+    state.selectedExtras = {};
+    state.extrasModalOpen = true;
+    renderExtrasModal();
+    document.getElementById('extras-modal').classList.add('open');
+    document.getElementById('extras-modal-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeExtrasPicker() {
-    state.extrasPickerOpen = false;
+  function closeExtrasModal() {
+    state.extrasModalOpen = false;
     state.pendingCartItem = null;
-    state.selectedExtraIds = {};
-    document.getElementById('extras-picker').classList.remove('open');
-    document.getElementById('extras-picker-overlay').classList.remove('open');
+    state.selectedExtras = {};
+    document.getElementById('extras-modal').classList.remove('open');
+    document.getElementById('extras-modal-overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
 
   function toggleExtra(extraId) {
-    if (state.selectedExtraIds[extraId]) {
-      delete state.selectedExtraIds[extraId];
+    if (state.selectedExtras[extraId]) {
+      delete state.selectedExtras[extraId];
     } else {
-      state.selectedExtraIds[extraId] = true;
+      state.selectedExtras[extraId] = 1;
     }
-    renderExtrasPicker();
+    renderExtrasModal();
   }
 
-  function renderExtrasPicker() {
+  function renderExtrasModal() {
     var pending = state.pendingCartItem;
     if (!pending) return;
 
-    // Pending info
-    document.getElementById('extras-picker-pending').innerHTML =
-      '<p class="name">' + pending.name + '</p>' +
-      '<p class="tier">Maxi \u2014 ' + formatPrice(pending.price) + '</p>';
+    document.getElementById('extras-modal-product').textContent = pending.name + ' \u2014 ' + formatPrice(pending.price);
 
-    // Extras list
-    var bodyHtml = '<p class="extras-section-title">Add to select any option</p>';
+    var bodyHtml = '';
     EXTRAS.forEach(function (e) {
-      var sel = !!state.selectedExtraIds[e.id];
-      bodyHtml += '<div class="extras-item' + (sel ? ' selected' : '') + '" onclick="toggleExtra(\'' + e.id + '\')">' +
-        '<div class="extras-item-check">' + (sel ? ICONS.check : '') + '</div>' +
-        '<span class="extras-item-name">' + e.name + '</span>' +
-        '<span class="extras-item-price">' + formatPrice(e.price) + '</span>' +
+      var qty = state.selectedExtras[e.id] || 0;
+      var isAdded = qty > 0;
+      bodyHtml += '<div class="extras-row' + (isAdded ? ' selected' : '') + '">' +
+        '<div class="extras-row-info">' +
+          '<span class="extras-row-name">' + e.name + '</span>' +
+          '<span class="extras-row-price">' + formatPrice(e.price) + '</span>' +
+        '</div>' +
+        '<div class="extras-row-actions">' +
+          '<button class="extras-add-btn' + (isAdded ? ' added' : '') + '" onclick="toggleExtra(\'' + e.id + '\')">' + (isAdded ? 'ADDED' : 'ADD') + '</button>' +
+        '</div>' +
       '</div>';
     });
-    document.getElementById('extras-picker-body').innerHTML = bodyHtml;
+    document.getElementById('extras-modal-body').innerHTML = bodyHtml;
 
     // Footer total
     var extrasTotal = 0;
-    for (var eid in state.selectedExtraIds) {
+    for (var eid in state.selectedExtras) {
       var ex = EXTRAS.find(function (e) { return e.id === eid; });
-      if (ex) extrasTotal += ex.price;
+      if (ex) extrasTotal += ex.price * state.selectedExtras[eid];
     }
     var grandTotal = pending.price + extrasTotal;
     var extrasStr = extrasTotal > 0 ? ' + Extras: ' + formatPrice(extrasTotal) : '';
 
-    document.getElementById('extras-picker-footer').innerHTML =
+    document.getElementById('extras-modal-footer').innerHTML =
       '<div class="extras-total-row"><span class="label">Base: ' + formatPrice(pending.price) + extrasStr + '</span><span class="value">' + formatPrice(grandTotal) + '</span></div>' +
       '<button class="btn btn-primary" style="width:100%;padding:16px;" onclick="confirmExtrasSelection()">Add to Cart \u2014 ' + formatPrice(grandTotal) + '</button>';
   }
@@ -372,9 +388,11 @@
     if (!pending) return;
 
     var selectedExtras = [];
-    for (var eid in state.selectedExtraIds) {
+    for (var eid in state.selectedExtras) {
       var ex = EXTRAS.find(function (e) { return e.id === eid; });
-      if (ex) selectedExtras.push({ id: ex.id, name: ex.name, price: ex.price });
+      if (ex && state.selectedExtras[eid] > 0) {
+        selectedExtras.push({ id: ex.id, name: ex.name, price: ex.price, qty: state.selectedExtras[eid] });
+      }
     }
 
     pending.extras = selectedExtras;
@@ -382,7 +400,7 @@
 
     var extrasStr = selectedExtras.length > 0 ? ' with ' + selectedExtras.map(function (e) { return e.name; }).join(', ') : '';
     toast(pending.name + extrasStr + ' added to cart');
-    closeExtrasPicker();
+    closeExtrasModal();
   }
 
   /* --------------------------------------------
@@ -405,54 +423,47 @@
     var mainsContainer = document.getElementById('mains-grid');
     var drinksContainer = document.getElementById('drinks-grid');
 
-    // ---- Mains: each tier as standalone card ----
+    // ---- Mains: each product is a standalone card ----
     var mainsHtml = '';
     PRODUCTS.forEach(function (p) {
-      var tiers = [
-        { key: 'regular', price: p.regular, image: p.images.regular, hasExtras: false },
-        { key: 'maxi', price: p.maxi, image: p.images.maxi, hasExtras: p.acceptsExtras },
-      ];
-      if (p.combo) {
-        tiers.push({ key: 'combo', price: p.combo, image: p.images.combo, hasExtras: false });
+      var imgUrl = p.image || '';
+      var imgHtml = imgUrl
+        ? '<img src="' + imgUrl + '" alt="' + p.name + '" loading="lazy">'
+        : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
+
+      var qty = getCartQtyForCard(p.id);
+      var countHtml = qty > 0 ? '<span class="card-add-count">' + qty + '</span>' : '';
+
+      var extrasHint = '';
+      if (p.acceptsExtras) { extrasHint = '<span class="extras-hint">Extras available</span>'; }
+
+      var addAction;
+      if (p.acceptsExtras) {
+        addAction = 'onclick="openExtrasModal(\'' + p.id + '\')"';
+      } else {
+        addAction = 'onclick="handleAddToCartDirect(\'' + p.id + '\')"';
       }
-      tiers.forEach(function (t) {
-        var imgUrl = t.image || '';
-        var imgHtml = imgUrl
-          ? '<img src="' + imgUrl + '" alt="' + p.name + ' ' + getTierLabel(t.key) + '" loading="lazy">'
-          : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
 
-        var comboBadge = t.key === 'combo' && p.comboLabel
-          ? ' <span class="combo-badge-inline">' + getComboBadge(p.comboLabel) + '</span>'
-          : '';
+      var cardId = 'card-desc-' + p.id;
+      var descId = 'desc-' + p.id;
+      var shortDesc = p.description || '';
+      var isLong = shortDesc.length > 80;
 
-        var qty = getCartQtyForCard(p.id, t.key);
-        var countHtml = qty > 0 ? '<span class="card-add-count">' + qty + '</span>' : '';
-
-        var extrasHint = '';
-        if (t.hasExtras) { extrasHint = '<span class="extras-hint">Customisable</span>'; }
-
-        var addAction;
-        if (t.hasExtras) {
-          addAction = 'onclick="openExtrasPicker(\'' + p.id + '\')"';
-        } else {
-          addAction = 'onclick="handleAddToCartDirect(\'' + p.id + '\',\'' + t.key + '\')"';
-        }
-
-        mainsHtml += '<div class="product-card" data-product-id="' + p.id + '" data-tier="' + t.key + '">' +
-          '<div class="product-card-image">' + imgHtml +
-            '<span class="tier-badge tier-badge-' + t.key + '">' + getTierLabel(t.key) + '</span>' +
+      mainsHtml += '<div class="product-card" data-product-id="' + p.id + '">' +
+        '<div class="product-card-image">' + imgHtml + '</div>' +
+        '<div class="product-card-body">' +
+          '<span class="card-name">' + p.name + '</span>' +
+          '<div class="card-desc-wrap" id="' + cardId + '">' +
+            '<span class="card-desc" id="' + descId + '">' + escHtml(shortDesc) + '</span>' +
+            (isLong ? ' <button class="see-more-btn" onclick="toggleDesc(\'' + p.id + '\', this)">See more</button>' : '') +
           '</div>' +
-          '<div class="product-card-body">' +
-            '<span class="card-name">' + p.name + comboBadge + '</span>' +
-            '<span class="card-desc">' + p.description + '</span>' +
-            extrasHint +
-            '<div class="product-card-footer">' +
-              '<span class="card-price">' + formatPrice(t.price) + '</span>' +
-              '<button class="card-add-btn" ' + addAction + '>' + ICONS.plus + countHtml + '</button>' +
-            '</div>' +
+          extrasHint +
+          '<div class="product-card-footer">' +
+            '<span class="card-price">' + formatPrice(p.price) + '</span>' +
+            '<button class="card-add-btn" ' + addAction + '>' + ICONS.plus + countHtml + '</button>' +
           '</div>' +
-        '</div>';
-      });
+        '</div>' +
+      '</div>';
     });
     mainsContainer.innerHTML = mainsHtml;
 
@@ -462,13 +473,10 @@
       var dImgHtml = d.image
         ? '<img src="' + d.image + '" alt="' + d.name + '" loading="lazy">'
         : '<span class="placeholder-icon">' + ICONS.utensils + '</span>';
-      var qty = 0;
-      state.cart.forEach(function (item) { if (item.productId === 'drink-' + d.id) qty += item.quantity; });
+      var qty = getCartQtyForCard('drink-' + d.id);
       var countHtml = qty > 0 ? '<span class="card-add-count">' + qty + '</span>' : '';
       drinksHtml += '<div class="product-card" data-product-id="drink-' + d.id + '">' +
-        '<div class="product-card-image">' + dImgHtml +
-          '<span class="tier-badge tier-badge-drink">Drink</span>' +
-        '</div>' +
+        '<div class="product-card-image">' + dImgHtml + '</div>' +
         '<div class="product-card-body">' +
           '<span class="card-name">' + d.name + '</span>' +
           '<span class="card-desc">Refreshing drink to complement your meal.</span>' +
@@ -488,23 +496,41 @@
     if (drinksWrap) drinksWrap.style.display = (state.categoryFilter === 'all' || state.categoryFilter === 'drinks') ? 'block' : 'none';
   }
 
+  function escHtml(s) {
+    var div = document.createElement('div');
+    div.textContent = s || '';
+    return div.innerHTML;
+  }
+
+  function toggleDesc(productId, btn) {
+    var descEl = document.getElementById('desc-' + productId);
+    var wrapEl = document.getElementById('card-desc-' + productId);
+    if (!descEl || !wrapEl) return;
+    if (wrapEl.classList.contains('expanded')) {
+      var p = PRODUCTS.find(function (pr) { return pr.id === productId; });
+      descEl.textContent = p ? (p.description || '') : '';
+      wrapEl.classList.remove('expanded');
+      btn.textContent = 'See more';
+    } else {
+      wrapEl.classList.add('expanded');
+      btn.textContent = 'See less';
+    }
+  }
+
   /* --------------------------------------------
      ADD TO CART (direct, no extras)
   -------------------------------------------- */
-  function handleAddToCartDirect(productId, tier) {
+  function handleAddToCartDirect(productId) {
     var product = PRODUCTS.find(function (p) { return p.id === productId; });
     if (!product) return;
-    var price = getPriceForTier(product, tier);
     addToCart({
       productId: product.id,
       name: product.name,
-      price: price,
-      tier: tier,
-      comboLabel: tier === 'combo' ? product.comboLabel : null,
+      price: product.price,
       extras: [],
-      image: product.images[tier] || '',
+      image: product.image || '',
     });
-    toast(product.name + ' (' + getTierLabel(tier) + ') added to cart');
+    toast(product.name + ' added to cart');
   }
 
   function addDrink(drinkId) {
@@ -514,8 +540,6 @@
       productId: 'drink-' + drink.id,
       name: drink.name,
       price: drink.price,
-      tier: 'drink',
-      comboLabel: null,
       extras: [],
       image: drink.image || '',
     });
@@ -554,13 +578,11 @@
 
     var summaryHtml = '';
     state.cart.forEach(function (item) {
-      var extrasTotal = item.extras.reduce(function (s, e) { return s + e.price; }, 0);
+      var extrasTotal = item.extras.reduce(function (s, e) { return s + (e.price || 0) * (e.qty || 1); }, 0);
       var unitTotal = item.price + extrasTotal;
-      var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
-        ? ' <span style="color:var(--primary);font-weight:600;">(' + (item.comboLabel || getTierLabel(item.tier)) + ')</span>' : '';
-      var extrasStr = item.extras.length > 0 ? '<p class="item-extras">+ ' + item.extras.map(function (e) { return e.name; }).join(', ') + '</p>' : '';
+      var extrasStr = item.extras.length > 0 ? '<p class="item-extras">+ ' + item.extras.map(function (e) { return e.name + (e.qty > 1 ? ' x' + e.qty : ''); }).join(', ') + '</p>' : '';
       summaryHtml += '<div class="order-summary-item">' +
-        '<div class="item-name">' + item.name + tierStr + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + extrasStr + '</div>' +
+        '<div class="item-name">' + item.name + ' <span class="item-qty">\u00D7' + item.quantity + '</span>' + extrasStr + '</div>' +
         '<span class="item-total">' + formatPrice(unitTotal * item.quantity) + '</span>' +
       '</div>';
     });
@@ -586,42 +608,20 @@
 
     var total = getCartTotal();
 
-    // Build WhatsApp message
-    var msg = '*New Order from GIZDODOSPECIALS*%0A%0A';
-    msg += '*Customer:* ' + name + '%0A';
-    msg += '*Phone:* ' + phone + '%0A';
-    if (email) msg += '*Email:* ' + email + '%0A';
-    msg += '*Type:* ' + (deliveryType === 'delivery' ? 'Delivery' : 'Pickup') + '%0A';
-    if (deliveryType === 'delivery') {
-      msg += '*Address:* ' + address + '%0A';
-      if (area) msg += '*Area:* ' + area + '%0A';
-    }
-    if (notes) msg += '*Notes:* ' + notes + '%0A';
-    msg += '%0A*Order:*%0A';
-    state.cart.forEach(function (item) {
-      var tierStr = item.tier !== 'regular' && item.tier !== 'drink'
-        ? ' (' + (item.comboLabel || getTierLabel(item.tier)) + ')' : '';
-      var extrasStr = item.extras.length > 0 ? ' + ' + item.extras.map(function (e) { return e.name; }).join(', ') : '';
-      msg += '\u2022 ' + item.name + tierStr + extrasStr + ' \u00D7' + item.quantity + ' = ' + formatPrice((item.price + item.extras.reduce(function (s, e) { return s + e.price; }, 0)) * item.quantity) + '%0A';
-    });
-    msg += '%0A*Total: ' + formatPrice(total) + '*%0A';
-    msg += '%0APayment made to ' + CONFIG.BANK_NAME + ' ' + CONFIG.BANK_ACCOUNT + ' (' + CONFIG.BANK_ACC_NAME + ')';
-
-    // Generate order number FIRST (needed for Supabase + customer)
+    // Generate order number
     var now = new Date();
     var dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
     var rand = Math.floor(Math.random() * 9000) + 1000;
     var orderNumber = 'GZ-' + dateStr + '-' + rand;
 
-    // Save to Supabase if configured
+    // Save to Supabase
     if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY) {
       saveOrderToSupabase({ orderNumber: orderNumber, name: name, phone: phone, email: email, deliveryType: deliveryType, address: address, area: area, notes: notes, total: total });
     }
 
-    // Clear and show success
+    // Clear cart and show success
     clearCart();
     closeCheckout();
-    renderFAB();
     renderMenu();
     document.getElementById('success-order-number').textContent = orderNumber;
     document.getElementById('success-modal').classList.add('open');
@@ -655,7 +655,7 @@
           items: JSON.stringify(state.cart),
         }),
       });
-    } catch (e) { /* silent */ }
+    } catch (e) {}
   }
 
   function closeSuccessModal() {
@@ -689,7 +689,7 @@
 
   /* --------------------------------------------
      SUPABASE PRODUCT SYNC
-     Fetches products from Supabase; falls back to hardcoded.
+     Each DB row = one standalone product card
   -------------------------------------------- */
   function isSupabaseConfigured() {
     return CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY &&
@@ -704,7 +704,6 @@
     .then(function (r) { return r.json(); })
     .then(function (rows) {
       if (!rows || rows.length === 0) { renderMenu(); return; }
-      // Map Supabase rows to app format
       var mains = rows.filter(function (r) { return r.category === 'mains'; });
       var drinks = rows.filter(function (r) { return r.category === 'drinks'; });
       if (mains.length > 0) {
@@ -715,15 +714,9 @@
             description: r.description || '',
             category: 'mains',
             acceptsExtras: !!r.accepts_extras,
-            regular: r.regular_price || 0,
-            maxi: r.maxi_price || 0,
-            combo: r.combo_price || null,
+            price: r.regular_price || 0,
+            image: r.image_regular || r.image_single || '',
             comboLabel: r.combo_label || null,
-            images: {
-              regular: r.image_regular || '',
-              maxi: r.image_maxi || '',
-              combo: r.image_combo || '',
-            },
           };
         });
       }
@@ -739,16 +732,14 @@
       }
       renderMenu();
     })
-    .catch(function () {
-      // Fallback to hardcoded products
-      renderMenu();
-    });
+    .catch(function () { renderMenu(); });
   }
 
   /* --------------------------------------------
      INIT
   -------------------------------------------- */
   function init() {
+    loadCart();
     renderCartBadge();
     renderFAB();
     renderCategoryTabs();
@@ -763,7 +754,7 @@
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        if (state.extrasPickerOpen) closeExtrasPicker();
+        if (state.extrasModalOpen) closeExtrasModal();
         else if (state.checkoutOpen) closeCheckout();
         else if (state.cartOpen) closeCart();
         else if (state.mobileNavOpen) closeMobileNav();
@@ -782,11 +773,11 @@
   window.closeCart = closeCart;
   window.updateQuantity = updateQuantity;
   window.removeFromCart = removeFromCart;
-  window.toggleExtra = toggleExtra;
   window.setCategory = setCategory;
   window.handleAddToCartDirect = handleAddToCartDirect;
-  window.openExtrasPicker = openExtrasPicker;
-  window.closeExtrasPicker = closeExtrasPicker;
+  window.openExtrasModal = openExtrasModal;
+  window.closeExtrasModal = closeExtrasModal;
+  window.toggleExtra = toggleExtra;
   window.confirmExtrasSelection = confirmExtrasSelection;
   window.addDrink = addDrink;
   window.openCheckout = openCheckout;
@@ -795,6 +786,7 @@
   window.handlePlaceOrder = handlePlaceOrder;
   window.closeSuccessModal = closeSuccessModal;
   window.copyText = copyText;
+  window.toggleDesc = toggleDesc;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
