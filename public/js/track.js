@@ -6,8 +6,8 @@
   'use strict';
 
   var CONFIG = {
-    SUPABASE_URL: '__VITE_SUPABASE_URL__',
-    SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
+    SUPABASE_URL: '',
+    SUPABASE_KEY: '',
   };
 
   var ICONS = {
@@ -90,7 +90,7 @@
       items.forEach(function (item) {
         var extrasTotal = (item.extras || []).reduce(function (s, e) { return s + (e.price || 0); }, 0);
         var unitTotal = (item.price || 0) + extrasTotal;
-        html += '<div class="track-item-row"><span>' + (item.name || 'Item') + (item.tier && item.tier !== 'regular' && item.tier !== 'drink' ? ' (' + (item.comboLabel || item.tier) + ')' : '') + (item.quantity > 1 ? ' &times;' + item.quantity : '') + '</span><span>' + formatPrice(unitTotal * (item.quantity || 1)) + '</span></div>';
+        html += '<div class="track-item-row"><span>' + (item.name || 'Item') + (item.quantity > 1 ? ' &times;' + item.quantity : '') + '</span><span>' + formatPrice(unitTotal * (item.quantity || 1)) + '</span></div>';
       });
       html += '</div>';
     }
