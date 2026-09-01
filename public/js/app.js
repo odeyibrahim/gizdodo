@@ -704,8 +704,29 @@
           order_notes: order.notes, total: order.total, status: 'payment_pending',
           items: JSON.stringify(state.cart),
         }),
-      });
+      }).then(function (res) {
+        // After order is saved, trigger push notification to admin devices
+        if (res.ok) triggerPushNotification(order);
+      }).catch(function () {});
     } catch (e) {}
+  }
+
+  function triggerPushNotification(order) {
+    // Only trigger if Edge Function URL is configured (not a placeholder)
+    var edgeUrl = CONFIG.SUPABASE_URL;
+    if (!edgeUrl || edgeUrl.indexOf('__') === 0) return;
+    fetch(edgeUrl + '/functions/v1/send-push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'New Order: ' + order.orderNumber,
+        body: order.name + ' placed an order for \u20A6' + order.total.toLocaleString(),
+        url: '/admin/',
+        tag: 'order-' + order.orderNumber,
+      }),
+    }).catch(function () {
+      // Silent fail — order is already saved, push is best-effort
+    });
   }
 
   function closeSuccessModal() {
