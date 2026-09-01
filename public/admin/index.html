@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Admin — GIZDODOSPECIALS</title>
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#EBB213">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GizAdmin">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/images/logo.jpg">
   <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
@@ -103,7 +109,7 @@
           </div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+              <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th class="hide-mobile">Date</th></tr></thead>
               <tbody id="recent-orders-body"></tbody>
             </table>
           </div>
@@ -122,7 +128,7 @@
         <div class="data-card">
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Order</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Order</th><th>Customer</th><th class="hide-mobile">Phone</th><th>Total</th><th>Status</th><th class="hide-mobile">Date</th><th>Actions</th></tr></thead>
               <tbody id="orders-body"></tbody>
             </table>
           </div>
@@ -206,7 +212,7 @@
         <label>Description</label>
         <textarea id="pm-description" class="form-input form-textarea" placeholder="Describe the product..."></textarea>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-row-2col">
         <div class="form-group">
           <label>Price (&#x20A6;) <span style="color:var(--red);">*</span></label>
           <input type="number" id="pm-regular-price" class="form-input" placeholder="9000" min="0">
@@ -262,7 +268,7 @@
         <label>Drink Name</label>
         <input type="text" id="dm-name" class="form-input" placeholder="e.g. Chapman">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-row-2col">
         <div class="form-group">
           <label>Price (&#x20A6;)</label>
           <input type="number" id="dm-price" class="form-input" placeholder="3000" min="0">
@@ -327,5 +333,11 @@
 <!-- Admin Script -->
 <script src="/env.js"></script>
 <script src="/js/admin.js"></script>
+<!-- Register Service Worker for PWA -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function() {});
+}
+</script>
 </body>
 </html>
