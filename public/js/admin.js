@@ -13,6 +13,8 @@ var Admin = (function () {
     SUPABASE_URL: '__VITE_SUPABASE_URL__',
     SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
     STORAGE_BUCKET: 'product-images',
+    VAPID_PUBLIC_KEY: '__VITE_VAPID_PUBLIC_KEY__',
+    EDGE_FUNCTION_URL: '__VITE_SUPABASE_URL__',
   };
 
   /* --------------------------------------------
@@ -162,6 +164,7 @@ var Admin = (function () {
     sessionStorage.setItem('admin_auth', '1');
     unlockAudio();
     startOrderPolling();
+    subscribeToPushNotifications();
     loadDashboard();
   }
 
@@ -169,6 +172,7 @@ var Admin = (function () {
     state.loggedIn = false;
     sessionStorage.removeItem('admin_auth');
     stopOrderPolling();
+    unsubscribeFromPushNotifications();
     document.getElementById('login-screen').style.display = '';
     document.getElementById('admin-app').classList.remove('logged-in');
     document.getElementById('login-password').value = '';
@@ -1038,6 +1042,86 @@ var Admin = (function () {
   function stopOrderPolling() {
     if (orderPollInterval) { clearInterval(orderPollInterval); orderPollInterval = null; }
     _pollRunning = false;
+  }
+
+  /* --------------------------------------------
+     PUSH NOTIFICATIONS
+  -------------------------------------------- */
+  var _pushSubscription = null;
+
+  function subscribeToPushNotifications() {
+    if (!CONFIG.VAPID_PUBLIC_KEY || CONFIG.VAPID_PUBLIC_KEY.indexOf('__') === 0) {
+      // VAPID key not configured — skip push setup silently
+      return;
+    }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    // Request notification permission
+    Notification.requestPermission().then(function (permission) {
+      if (permission !== 'granted') {
+        console.log('Push notification permission denied');
+        return;
+      }
+      // Get service worker registration, then subscribe
+      navigator.serviceWorker.ready.then(function (registration) {
+        return registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY),
+        });
+      }).then(function (subscription) {
+        _pushSubscription = subscription;
+        // Send subscription to Edge Function (saved in Supabase)
+        return sendPushSubscriptionToServer(subscription);
+      }).then(function (res) {
+        if (res && res.ok) {
+          toast('Push notifications enabled');
+        }
+      }).catch(function (err) {
+        console.log('Push subscribe error:', err.message || err);
+      });
+    });
+  }
+
+  function unsubscribeFromPushNotifications() {
+    if (!_pushSubscription) return;
+    var sub = _pushSubscription;
+    _pushSubscription = null;
+    sub.unsubscribe().catch(function () {});
+    // Tell server to remove
+    if (CONFIG.EDGE_FUNCTION_URL && CONFIG.EDGE_FUNCTION_URL.indexOf('__') !== 0) {
+      fetch(CONFIG.EDGE_FUNCTION_URL + '/functions/v1/send-push', {
+        method: 'DELETE',
+        headers: {
+          'x-push-endpoint': sub.endpoint,
+        },
+      }).catch(function () {});
+    }
+  }
+
+  function sendPushSubscriptionToServer(subscription) {
+    if (!CONFIG.EDGE_FUNCTION_URL || CONFIG.EDGE_FUNCTION_URL.indexOf('__') === 0) {
+      return Promise.resolve(null);
+    }
+    var keys = subscription.toJSON().keys;
+    return fetch(CONFIG.EDGE_FUNCTION_URL + '/functions/v1/send-push', {
+      method: 'POST',
+      headers: {
+        'x-push-endpoint': subscription.endpoint,
+        'x-push-auth': keys.auth,
+        'x-push-p256dh': keys.p256dh,
+      },
+    });
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    var padding = '='.repeat((4 - base64String.length % 4) % 4);
+    var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    var rawData = window.atob(base64);
+    var outputArray = new Uint8Array(rawData.length);
+    for (var i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 
   /* --------------------------------------------
