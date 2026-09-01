@@ -9,9 +9,9 @@ var Admin = (function () {
      CONFIG
   -------------------------------------------- */
   var CONFIG = {
-    ADMIN_PASSWORD_HASH: '',
-    SUPABASE_URL: '',
-    SUPABASE_KEY: '',
+    ADMIN_PASSWORD_HASH: '__VITE_ADMIN_PASSWORD_HASH__',
+    SUPABASE_URL: '__VITE_SUPABASE_URL__',
+    SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
     STORAGE_BUCKET: 'product-images',
   };
 
