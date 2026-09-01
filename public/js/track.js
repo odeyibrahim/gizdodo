@@ -108,6 +108,26 @@
     resultEl.innerHTML = html;
   }
 
+  function initFAB() {
+    try {
+      var stored = localStorage.getItem('gizdodo_cart');
+      if (!stored) return;
+      var cart = JSON.parse(stored);
+      if (!Array.isArray(cart) || cart.length === 0) return;
+      var count = cart.reduce(function (s, item) { return s + item.quantity; }, 0);
+      var total = cart.reduce(function (s, item) {
+        var extrasTotal = item.extras.reduce(function (es, e) { return es + e.price * e.qty; }, 0);
+        return s + (item.price + extrasTotal) * item.quantity;
+      }, 0);
+      var fab = document.getElementById('cart-fab');
+      if (!fab) return;
+      fab.style.display = 'flex';
+      document.getElementById('fab-count').textContent = count > 99 ? '99+' : count;
+      document.getElementById('fab-text').textContent = count + ' item' + (count !== 1 ? 's' : '');
+      document.getElementById('fab-total').textContent = '\u20A6' + total.toLocaleString();
+    } catch (e) {}
+  }
+
   function init() {
     var btn = document.getElementById('back-to-top');
     if (btn) window.addEventListener('scroll', function () { btn.classList.toggle('visible', window.scrollY > 400); });
@@ -115,6 +135,7 @@
     var orderParam = params.get('order');
     if (orderParam) { var input = document.getElementById('track-input'); if (input) input.value = orderParam; trackOrder(); }
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMobileNav(); });
+    initFAB();
   }
 
   window.openMobileNav = openMobileNav;
