@@ -10,12 +10,12 @@
      CONFIG
   -------------------------------------------- */
   var CONFIG = {
-    WHATSAPP_PHONE: '__VITE_WHATSAPP_PHONE__',
+    WHATSAPP_PHONE: '',
     BANK_NAME: 'GTBank',
     BANK_ACCOUNT: '3005029891',
     BANK_ACC_NAME: 'Gizdodo Special Hub',
-    SUPABASE_URL: '__VITE_SUPABASE_URL__',
-    SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
+    SUPABASE_URL: '',
+    SUPABASE_KEY: '',
   };
 
   if (window.ENV) {
@@ -158,14 +158,10 @@
 
   function copyText(text, el) {
     var target = el || (typeof event !== 'undefined' ? event.currentTarget : null);
-    var doCopy = function () {
-      showCopied(target);
-      toast('Copied!', 'success');
-    };
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(doCopy);
+      navigator.clipboard.writeText(text).then(function () { showCopied(target); });
     } else {
-      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); doCopy();
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showCopied(target);
     }
   }
 
