@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#EBB213"/>
+  <text x="256" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="140" fill="#111">GIZ</text>
+  <text x="256" y="340" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="800" font-size="140" fill="#111">DODO</text>
+  <text x="256" y="430" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="700" font-size="60" fill="#1A1A1A" letter-spacing="8">SPECIALS</text>
+</svg>
