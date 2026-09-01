@@ -139,6 +139,17 @@
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
   </button>
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
+  <div id="cart-fab" class="cart-fab" style="display:none;" onclick="window.location.href='index.html'">
+    <div class="cart-fab-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span id="fab-count" class="fab-count">0</span>
+    </div>
+    <div class="cart-fab-info">
+      <span id="fab-text" class="fab-text">0 items</span>
+      <span id="fab-total" class="fab-total">&#x20A6;0</span>
+    </div>
+    <span class="fab-arrow">View &rarr;</span>
+  </div>
   <script>
     function copyText(text, el) {
       if (navigator.clipboard) {
@@ -174,6 +185,26 @@
       var btn = document.getElementById('back-to-top');
       if (!btn) return;
       window.addEventListener('scroll', function() { btn.classList.toggle('visible', window.scrollY > 400); });
+    })();
+    // Cart FAB from localStorage
+    (function() {
+      try {
+        var stored = localStorage.getItem('gizdodo_cart');
+        if (!stored) return;
+        var cart = JSON.parse(stored);
+        if (!Array.isArray(cart) || cart.length === 0) return;
+        var count = cart.reduce(function (s, item) { return s + item.quantity; }, 0);
+        var total = cart.reduce(function (s, item) {
+          var extrasTotal = item.extras.reduce(function (es, e) { return es + e.price * e.qty; }, 0);
+          return s + (item.price + extrasTotal) * item.quantity;
+        }, 0);
+        var fab = document.getElementById('cart-fab');
+        if (!fab) return;
+        fab.style.display = 'flex';
+        document.getElementById('fab-count').textContent = count > 99 ? '99+' : count;
+        document.getElementById('fab-text').textContent = count + ' item' + (count !== 1 ? 's' : '');
+        document.getElementById('fab-total').textContent = '\u20A6' + total.toLocaleString();
+      } catch (e) {}
     })();
   </script>
 </body>
