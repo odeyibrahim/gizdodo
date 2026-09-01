@@ -4,7 +4,7 @@
    Enables background notification support
    ============================================ */
 
-var CACHE_NAME = 'gizdodo-v1';
+var CACHE_NAME = 'gizdodo-v2';
 var STATIC_ASSETS = [
   '/',
   '/css/styles.css',
@@ -15,6 +15,9 @@ var STATIC_ASSETS = [
   '/js/admin.js',
   '/manifest.json',
   '/logo.svg',
+  '/track.html',
+  '/contact.html',
+  '/js/track.js',
 ];
 
 // Install: cache static assets
