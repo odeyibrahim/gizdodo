@@ -319,7 +319,7 @@ var Admin = (function () {
         '<td><strong>' + formatPrice(o.total) + '</strong></td>' +
         '<td><select class="status-select" onchange="Admin.updateOrderStatus(' + o.id + ', this.value)">' + statusOptions + '</select></td>' +
         '<td style="color:var(--text-muted);font-size:12px;">' + formatDate(o.created_at) + '</td>' +
-        '<td><button class="btn btn-outline btn-sm" onclick="Admin.viewOrder(' + idx + ')">View</button></td>' +
+        '<td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="Admin.viewOrder(' + idx + ')">View</button> <button class="btn btn-danger btn-sm" onclick="Admin.deleteOrder(' + idx + ')">Delete</button></td>' +
         '</tr>';
     });
     tbody.innerHTML = html;
@@ -332,6 +332,27 @@ var Admin = (function () {
       if (state.currentPage === 'orders') loadOrders();
       else loadDashboard();
     }).catch(function (e) { toast('Failed to update: ' + e.message, 'error'); });
+  }
+
+  function deleteOrder(idx) {
+    var o = state.orders[idx];
+    if (!o) return;
+    showConfirm(
+      'Delete Order ' + escHtml(o.order_number) + '?',
+      'This will permanently remove this order and it will no longer be counted in totals. This cannot be undone.',
+      function () {
+        apiDelete('orders', o.id).then(function () {
+          toast('Order ' + o.order_number + ' deleted');
+          // Remove from local state
+          state.orders.splice(idx, 1);
+          // Remove from known IDs so polling doesn't re-count it
+          delete _knownOrderIds[o.id];
+          // Refresh current view
+          if (state.currentPage === 'orders') renderOrders();
+          else loadDashboard();
+        }).catch(function (e) { toast('Error deleting order: ' + e.message, 'error'); });
+      }
+    );
   }
 
   function viewOrder(idx) {
@@ -369,12 +390,20 @@ var Admin = (function () {
 
     html += '<div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:2px solid var(--gray-200);"><span style="font-weight:700;font-size:15px;">Total</span><span style="font-weight:700;font-size:18px;">' + formatPrice(o.total) + '</span></div>';
 
+    // Store index for delete button
+    var modalFooter = document.getElementById('order-modal').querySelector('.modal-footer');
+    modalFooter.innerHTML = '<button class="btn btn-outline" onclick="Admin.closeOrderModal()">Close</button>' +
+      '<button class="btn btn-danger" onclick="Admin.deleteOrder(' + idx + '); Admin.closeOrderModal();">Delete Order</button>';
+
     document.getElementById('order-modal-body').innerHTML = html;
     document.getElementById('order-modal').classList.add('open');
   }
 
   function closeOrderModal() {
     document.getElementById('order-modal').classList.remove('open');
+    // Reset footer
+    var modalFooter = document.getElementById('order-modal').querySelector('.modal-footer');
+    if (modalFooter) modalFooter.innerHTML = '<button class="btn btn-outline" onclick="Admin.closeOrderModal()">Close</button>';
   }
 
   /* --------------------------------------------
@@ -1059,6 +1088,7 @@ var Admin = (function () {
     toggleSidebar: toggleSidebar,
     loadOrders: loadOrders,
     updateOrderStatus: updateOrderStatus,
+    deleteOrder: deleteOrder,
     viewOrder: viewOrder,
     closeOrderModal: closeOrderModal,
     openProductModal: openProductModal,
