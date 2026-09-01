@@ -6,8 +6,8 @@
   'use strict';
 
   var CONFIG = {
-    SUPABASE_URL: '',
-    SUPABASE_KEY: '',
+    SUPABASE_URL: '__VITE_SUPABASE_URL__',
+    SUPABASE_KEY: '__VITE_SUPABASE_ANON_KEY__',
   };
 
   var ICONS = {
