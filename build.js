@@ -13,6 +13,7 @@ const REPLACEMENTS = {
   '__VITE_SUPABASE_URL__'       : process.env.VITE_SUPABASE_URL || '',
   '__VITE_SUPABASE_ANON_KEY__'  : process.env.VITE_SUPABASE_ANON_KEY || '',
   '__VITE_WHATSAPP_PHONE__'     : process.env.VITE_WHATSAPP_PHONE || '',
+  '__VITE_VAPID_PUBLIC_KEY__'   : process.env.VITE_VAPID_PUBLIC_KEY || '',
 };
 
 const PROCESS_FILES = [
