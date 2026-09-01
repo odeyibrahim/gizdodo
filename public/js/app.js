@@ -621,10 +621,13 @@
     closeCheckout();
     renderMenu();
     document.getElementById('success-order-number').textContent = orderNumber;
-    document.getElementById('success-modal').classList.add('open');
 
-    // Send order details via WhatsApp (opens in new tab)
-    sendOrderWhatsApp(orderNumber, name, phone, email, deliveryType, address, area, notes, total, orderCart);
+    // Store WhatsApp URL for the "Send via WhatsApp" button (do NOT open it automatically)
+    state._pendingWhatsAppUrl = buildWhatsAppUrl(orderNumber, name, phone, email, deliveryType, address, area, notes, total, orderCart);
+    var waBtn = document.getElementById('success-wa-btn');
+    if (waBtn) waBtn.style.display = state._pendingWhatsAppUrl ? '' : 'none';
+
+    document.getElementById('success-modal').classList.add('open');
 
     // Reset form
     document.getElementById('checkout-name').value = '';
@@ -637,9 +640,9 @@
     setDeliveryType('delivery');
   }
 
-  function sendOrderWhatsApp(orderNumber, name, phone, email, deliveryType, address, area, notes, total, cart) {
+  function buildWhatsAppUrl(orderNumber, name, phone, email, deliveryType, address, area, notes, total, cart) {
     var waPhone = CONFIG.WHATSAPP_PHONE.replace(/[^0-9]/g, '');
-    if (!waPhone || waPhone.indexOf('__VITE_') === 0) return;
+    if (!waPhone || waPhone.indexOf('__VITE_') === 0) return null;
 
     // Build item lines
     var itemLines = [];
@@ -675,8 +678,13 @@
     msg += '--------------------------------\n';
     msg += 'Payment confirmed by customer.';
 
-    var url = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg);
-    window.open(url, '_blank');
+    return 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(msg);
+  }
+
+  function openPendingWhatsApp() {
+    if (state._pendingWhatsAppUrl) {
+      window.open(state._pendingWhatsAppUrl, '_blank');
+    }
   }
 
   function saveOrderToSupabase(order) {
@@ -828,6 +836,7 @@
   window.handlePlaceOrder = handlePlaceOrder;
   window.closeSuccessModal = closeSuccessModal;
   window.copyText = copyText;
+  window.openPendingWhatsApp = openPendingWhatsApp;
   window.toggleDesc = toggleDesc;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
