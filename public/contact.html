@@ -92,9 +92,18 @@
             <h3>Payment Details</h3>
           </div>
           <p>All orders are paid via bank transfer. Kindly make payment and send your receipt via WhatsApp.</p>
-          <div class="payment-info-row"><span class="label">Bank:</span><span class="value">GTBank</span></div>
-          <div class="payment-info-row"><span class="label">Account Number:</span><span class="value mono">3005029891</span></div>
-          <div class="payment-info-row"><span class="label">Account Name:</span><span class="value">Gizdodo Special Hub</span></div>
+          <div class="bank-detail-copy" onclick="copyText('GTBank', this)">
+            <span class="payment-info-row" style="flex:1;"><span class="label">Bank:</span><span class="value">GTBank</span></span>
+            <button class="copy-btn" aria-label="Copy bank name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
+          <div class="bank-detail-copy" onclick="copyText('3005029891', this)">
+            <span class="payment-info-row" style="flex:1;"><span class="label">Account Number:</span><span class="value mono">3005029891</span></span>
+            <button class="copy-btn" aria-label="Copy account number"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
+          <div class="bank-detail-copy" onclick="copyText('Gizdodo Special Hub', this)">
+            <span class="payment-info-row" style="flex:1;"><span class="label">Account Name:</span><span class="value">Gizdodo Special Hub</span></span>
+            <button class="copy-btn" aria-label="Copy account name"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          </div>
         </div>
       </div>
     </section>
@@ -131,6 +140,18 @@
   </button>
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
   <script>
+    function copyText(text, el) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function () {
+          var btn = (el || event.currentTarget).querySelector('.copy-btn');
+          if (btn) { btn.classList.add('copied'); setTimeout(function () { btn.classList.remove('copied'); }, 1500); }
+        });
+      } else {
+        var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        var btn = (el || event.currentTarget).querySelector('.copy-btn');
+        if (btn) { btn.classList.add('copied'); setTimeout(function () { btn.classList.remove('copied'); }, 1500); }
+      }
+    }
     function openMobileNav() {
       document.getElementById('mobile-nav').classList.add('open');
       document.getElementById('mobile-nav-overlay').classList.add('open');
