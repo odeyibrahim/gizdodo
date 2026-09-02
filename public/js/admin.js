@@ -42,6 +42,13 @@ var Admin = (function () {
   var STATUS_OPTIONS = ['payment_pending','confirmed','preparing','ready','out_for_delivery','delivered','cancelled'];
 
   /* --------------------------------------------
+     MOBILE DETECTION
+  -------------------------------------------- */
+  function isMobile() {
+    return window.innerWidth <= 768;
+  }
+
+  /* --------------------------------------------
      HELPERS
   -------------------------------------------- */
   function sha256(str) {
@@ -199,17 +206,57 @@ var Admin = (function () {
     for (var j = 0; j < links.length; j++) {
       links[j].classList.toggle('active', links[j].getAttribute('data-page') === page);
     }
+    // Bottom tab bar active
+    var tabs = document.querySelectorAll('.mobile-tab[data-page]');
+    for (var t = 0; t < tabs.length; t++) {
+      var tabPage = tabs[t].getAttribute('data-page');
+      tabs[t].classList.toggle('active', tabPage === page || (tabPage === 'products' && page === 'drinks'));
+    }
     // Mobile title
-    var titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', drinks: 'Drinks', settings: 'Settings' };
+    var titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Menu', drinks: 'Menu', settings: 'More' };
     document.getElementById('mobile-page-title').textContent = titles[page] || page;
     // Close mobile sidebar
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('show');
+    // Manage mobile FAB (shows on products/drinks pages)
+    manageMobileFAB(page);
+    // Manage mobile settings nav
+    manageMobileSettingsNav(page);
     // Load data
     if (page === 'dashboard') loadDashboard();
     else if (page === 'orders') loadOrders();
     else if (page === 'products') loadProducts();
     else if (page === 'drinks') loadDrinks();
+  }
+
+  function manageMobileFAB(page) {
+    var existingFab = document.getElementById('mobile-fab');
+    if (existingFab) existingFab.remove();
+    if (!isMobile()) return;
+    if (page !== 'products' && page !== 'drinks') return;
+    var fab = document.createElement('button');
+    fab.id = 'mobile-fab';
+    fab.className = 'mobile-fab';
+    fab.setAttribute('aria-label', 'Add new item');
+    fab.onclick = page === 'products' ? function () { Admin.openProductModal(); } : function () { Admin.openDrinkModal(); };
+    fab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    document.body.appendChild(fab);
+  }
+
+  function manageMobileSettingsNav(page) {
+    var existing = document.getElementById('mobile-settings-nav');
+    if (existing) existing.remove();
+    if (!isMobile() || page !== 'settings') return;
+    var pageEl = document.getElementById('page-settings');
+    var nav = document.createElement('div');
+    nav.id = 'mobile-settings-nav';
+    nav.className = 'mobile-settings-nav';
+    nav.innerHTML =
+      '<a onclick="Admin.navigate(\'products\')"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>Products</a>' +
+      '<a onclick="Admin.navigate(\'drinks\')"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2h8l4 10H4L8 2z"/><path d="M12 12v6a4 4 0 0 1-8 0"/></svg>Drinks</a>' +
+      '<a onclick="Admin.navigate(\'orders\')"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Orders</a>' +
+      '<a onclick="Admin.logout()"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</a>';
+    pageEl.insertBefore(nav, pageEl.firstChild);
   }
 
   function toggleSidebar() {
@@ -248,10 +295,23 @@ var Admin = (function () {
 
   function renderRecentOrders(orders) {
     var tbody = document.getElementById('recent-orders-body');
+    // Mobile cards container
+    var mobileContainer = document.getElementById('recent-orders-mobile');
+    if (!mobileContainer) {
+      mobileContainer = document.createElement('div');
+      mobileContainer.id = 'recent-orders-mobile';
+      mobileContainer.className = 'mobile-cards-container';
+      mobileContainer.style.display = 'none';
+      tbody.parentElement.parentElement.appendChild(mobileContainer);
+    }
+
     if (!orders || orders.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted);">No orders yet.</td></tr>';
+      mobileContainer.innerHTML = '<div class="empty-state" style="padding:24px 0;"><p style="font-size:13px;">No orders yet.</p></div>';
       return;
     }
+
+    // Desktop table
     var html = '';
     orders.slice(0, 5).forEach(function (o) {
       var st = STATUS_MAP[o.status] || STATUS_MAP.payment_pending;
@@ -264,6 +324,23 @@ var Admin = (function () {
         '</tr>';
     });
     tbody.innerHTML = html;
+
+    // Mobile cards
+    var mHtml = '';
+    orders.slice(0, 5).forEach(function (o, idx) {
+      var st = STATUS_MAP[o.status] || STATUS_MAP.payment_pending;
+      mHtml += '<div class="mobile-order-card" data-status="' + o.status + '" onclick="Admin.viewOrder(' + idx + ')">' +
+        '<div class="moc-top">' +
+          '<span class="moc-order-num">' + escHtml(o.order_number) + '</span>' +
+          '<span class="badge ' + st.badge + '">' + st.label + '</span>' +
+        '</div>' +
+        '<div class="moc-info">' +
+          '<span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escHtml(o.customer_name) + '</span>' +
+          '<span>' + formatPrice(o.total) + '</span>' +
+        '</div>' +
+      '</div>';
+    });
+    mobileContainer.innerHTML = mHtml;
   }
 
   /* --------------------------------------------
@@ -284,7 +361,37 @@ var Admin = (function () {
     var tbody = document.getElementById('orders-body');
     var orders = state.orders;
 
-    // Sort bar
+    // Mobile cards container
+    var pageEl = document.getElementById('page-orders');
+    var mobileContainer = document.getElementById('orders-mobile');
+    if (!mobileContainer) {
+      mobileContainer = document.createElement('div');
+      mobileContainer.id = 'orders-mobile';
+      mobileContainer.className = 'mobile-cards-container';
+      mobileContainer.style.display = 'none';
+      // Insert before the data-card
+      var dataCard = pageEl.querySelector('.data-card');
+      if (dataCard) pageEl.insertBefore(mobileContainer, dataCard);
+    }
+
+    // Mobile sort bar
+    var mobileSort = document.getElementById('orders-mobile-sort');
+    if (!mobileSort) {
+      mobileSort = document.createElement('div');
+      mobileSort.id = 'orders-mobile-sort';
+      mobileSort.className = 'mobile-sort-bar';
+      pageEl.insertBefore(mobileSort, pageEl.firstChild);
+    }
+    mobileSort.innerHTML = '<select onchange="Admin.sortOrders(this.value)">' +
+      '<option value="created_at.desc">Newest First</option>' +
+      '<option value="created_at.asc">Oldest First</option>' +
+      '<option value="total.desc">Highest Amount</option>' +
+      '<option value="total.asc">Lowest Amount</option>' +
+      '<option value="customer_name.asc">Name A-Z</option>' +
+      '<option value="status.asc">Status A-Z</option>' +
+    '</select>';
+
+    // Sort bar (desktop)
     var sortBar = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">' +
       '<div style="font-weight:600;color:var(--text);">Orders (' + (orders ? orders.length : 0) + ')</div>' +
       '<select id="order-sort-select" onchange="Admin.sortOrders(this.value)" style="padding:8px 12px;border-radius:8px;border:1px solid var(--gray-300);background:var(--card-bg);font-size:13px;font-weight:600;color:var(--text);">' +
@@ -306,8 +413,11 @@ var Admin = (function () {
 
     if (!orders || orders.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">No orders found.</td></tr>';
+      mobileContainer.innerHTML = '<div class="empty-state" style="padding:32px 0;"><p>No orders found.</p></div>';
       return;
     }
+
+    // Desktop table
     var html = '';
     orders.forEach(function (o, idx) {
       var st = STATUS_MAP[o.status] || STATUS_MAP.payment_pending;
@@ -327,6 +437,35 @@ var Admin = (function () {
         '</tr>';
     });
     tbody.innerHTML = html;
+
+    // Mobile cards
+    var mHtml = '';
+    orders.forEach(function (o, idx) {
+      var st = STATUS_MAP[o.status] || STATUS_MAP.payment_pending;
+      var statusOptions = '';
+      STATUS_OPTIONS.forEach(function (s) {
+        var sLabel = STATUS_MAP[s].label;
+        statusOptions += '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + sLabel + '</option>';
+      });
+      mHtml += '<div class="mobile-order-card" data-status="' + o.status + '">' +
+        '<div class="moc-top">' +
+          '<span class="moc-order-num">' + escHtml(o.order_number) + '</span>' +
+          '<span class="moc-amount">' + formatPrice(o.total) + '</span>' +
+        '</div>' +
+        '<div class="moc-info">' +
+          '<span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escHtml(o.customer_name) + '</span>' +
+          '<span><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' + escHtml(o.customer_phone) + '</span>' +
+        '</div>' +
+        '<div class="moc-bottom">' +
+          '<select class="status-select" onchange="Admin.updateOrderStatus(' + o.id + ', this.value)">' + statusOptions + '</select>' +
+          '<div class="moc-actions">' +
+            '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); Admin.viewOrder(' + idx + ')">View</button>' +
+            '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); Admin.deleteOrder(' + idx + ')">Del</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    mobileContainer.innerHTML = mHtml;
   }
 
   function updateOrderStatus(orderId, newStatus) {
@@ -644,10 +783,25 @@ var Admin = (function () {
   function renderDrinks() {
     var container = document.getElementById('drinks-container');
     var drinks = state.drinks || [];
+
+    // Create mobile container
+    var mobileContainer = document.getElementById('drinks-mobile');
+    if (!mobileContainer) {
+      mobileContainer = document.createElement('div');
+      mobileContainer.id = 'drinks-mobile';
+      mobileContainer.className = 'mobile-cards-container';
+      mobileContainer.style.display = 'none';
+      container.appendChild(mobileContainer);
+    }
+
     if (drinks.length === 0) {
       container.innerHTML = '<div class="empty-state"><p>No drinks yet. Add your first drink.</p></div>';
+      mobileContainer = document.getElementById('drinks-mobile');
+      if (mobileContainer) mobileContainer.innerHTML = '<div class="empty-state" style="padding:24px 0;"><p>No drinks yet.</p></div>';
       return;
     }
+
+    // Desktop table
     var html = '<div class="data-card"><div class="table-wrap"><table class="data-table">' +
       '<thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Sort</th><th>Active</th><th>Actions</th></tr></thead><tbody>';
     drinks.forEach(function (d, idx) {
@@ -666,7 +820,38 @@ var Admin = (function () {
         '</td></tr>';
     });
     html += '</tbody></table></div></div>';
+
+    // Mobile cards
+    var mHtml = '';
+    drinks.forEach(function (d, idx) {
+      var imgSrc = d.image_single || '';
+      var imgHtml = imgSrc
+        ? '<img class="mdc-img" src="' + escHtml(imgSrc) + '" onerror="this.style.display=\'none\'">'
+        : '<div class="mdc-img" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:11px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+      mHtml += '<div class="mobile-drink-card">' +
+        imgHtml +
+        '<div class="mdc-info">' +
+          '<div class="mdc-name">' + escHtml(d.name) + '</div>' +
+          '<div class="mdc-price">' + formatPrice(d.regular_price) + '</div>' +
+        '</div>' +
+        '<div class="mdc-actions">' +
+          '<button class="btn btn-outline btn-sm" onclick="Admin.editDrink(' + idx + ')">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="Admin.deleteDrink(' + idx + ')">Del</button>' +
+        '</div>' +
+      '</div>';
+    });
+
     container.innerHTML = html;
+    // Re-append mobile container after desktop HTML replaces innerHTML
+    var mc = document.getElementById('drinks-mobile');
+    if (!mc) {
+      mc = document.createElement('div');
+      mc.id = 'drinks-mobile';
+      mc.className = 'mobile-cards-container';
+      mc.style.display = 'none';
+      container.appendChild(mc);
+    }
+    mc.innerHTML = mHtml;
   }
 
   /* Drink Modal */
@@ -893,6 +1078,16 @@ var Admin = (function () {
     var mobileNotif = document.getElementById('mobile-notif-badge');
     if (mobileNotif) {
       mobileNotif.textContent = count > 0 ? (count > 99 ? '99+' : count) : '';
+    }
+    // 5. Mobile bottom tab badge
+    var tabBadge = document.getElementById('mobile-tab-badge');
+    if (tabBadge) {
+      if (count > 0) {
+        tabBadge.textContent = count > 99 ? '99+' : count;
+        tabBadge.style.display = 'flex';
+      } else {
+        tabBadge.style.display = 'none';
+      }
     }
   }
 
