@@ -87,6 +87,27 @@
     </div>
   </aside>
 
+  <!-- Mobile Bottom Tab Bar -->
+  <nav class="mobile-tabs" id="mobile-tabs">
+    <a class="mobile-tab active" data-page="dashboard" onclick="Admin.navigate('dashboard')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Home</span>
+    </a>
+    <a class="mobile-tab" data-page="orders" onclick="Admin.navigate('orders')" style="position:relative;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span>Orders</span>
+      <span id="mobile-tab-badge" class="tab-badge" style="display:none;"></span>
+    </a>
+    <a class="mobile-tab" data-page="products" onclick="Admin.navigate('products')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      <span>Menu</span>
+    </a>
+    <a class="mobile-tab" data-page="settings" onclick="Admin.navigate('settings')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>More</span>
+    </a>
+  </nav>
+
   <!-- Main Content -->
   <div class="main-content">
     <div class="content-area">
@@ -138,11 +159,17 @@
       <!-- PRODUCTS PAGE -->
       <div class="page" id="page-products" style="display:none;">
         <div class="page-header">
-          <h2>Products</h2>
-          <button class="btn btn-primary btn-sm" onclick="Admin.openProductModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Product
-          </button>
+          <h2>Menu</h2>
+          <div class="page-header-actions">
+            <div class="mobile-sub-tabs" id="mobile-sub-tabs">
+              <a class="sub-tab active" onclick="Admin.navigate('products')">Food</a>
+              <a class="sub-tab" onclick="Admin.navigate('drinks')">Drinks</a>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="Admin.openProductModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Product
+            </button>
+          </div>
         </div>
         <div id="products-container"></div>
       </div>
@@ -151,10 +178,16 @@
       <div class="page" id="page-drinks" style="display:none;">
         <div class="page-header">
           <h2>Drinks</h2>
-          <button class="btn btn-primary btn-sm" onclick="Admin.openDrinkModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Drink
-          </button>
+          <div class="page-header-actions">
+            <div class="mobile-sub-tabs" id="mobile-sub-tabs-drinks">
+              <a class="sub-tab" onclick="Admin.navigate('products')">Food</a>
+              <a class="sub-tab active" onclick="Admin.navigate('drinks')">Drinks</a>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="Admin.openDrinkModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Drink
+            </button>
+          </div>
         </div>
         <div id="drinks-container"></div>
       </div>
