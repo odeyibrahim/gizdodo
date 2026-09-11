@@ -715,7 +715,8 @@ var Admin = (function () {
       return uploadToStorage(storagePath, file).then(function (url) {
         results.regular = url;
         return results;
-      }).catch(function () {
+      }).catch(function (e) {
+        toast('Image upload failed: ' + (e.message || 'check Supabase Storage bucket/policies'), 'error');
         results.regular = currentUrl || '';
         return results;
       });
@@ -920,7 +921,8 @@ var Admin = (function () {
       var storagePath = productId + '/' + Date.now() + '.' + ext;
       uploadPromise = uploadToStorage(storagePath, file).then(function (url) {
         data.image_single = url;
-      }).catch(function () {
+      }).catch(function (e) {
+        toast('Image upload failed: ' + (e.message || 'check Supabase Storage bucket/policies'), 'error');
         data.image_single = currentUrl || '';
       });
     } else {
